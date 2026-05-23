@@ -1,8 +1,59 @@
 # KOPIS War Room Wrap-Up
 
-Updated: 2026-05-22T21:15:00-0700
+Updated: 2026-05-22T21:35:00-0700
 
-## 2026-05-22 Session Summary
+## 2026-05-22 Session 2 Summary
+
+### What Changed
+
+Visual polish pass + export views built. Git initialized.
+
+Visual improvements (commit 2):
+- Font system: Karla (body) + Barlow Semi Condensed (h1 display) via Google Fonts, replacing system Inter
+- Table zebra striping and hover row states on all MatrixTable instances
+- Standalone panel `margin-bottom: 1rem` on `.content-shell > .panel` — fixes panel stacking on Legal Path and Next Moves
+- Work-list meta badge chips — small bordered rectangles replacing unstyled spans
+- Panel icons now inherit route accent color (`--route-color`) instead of fixed blue
+- Work-list body text capped at `72ch`
+- `.impeccable.md` design context file written to project root
+
+Export views (commit 2):
+- Three print-ready routes: `/export/counsel`, `/export/lender`, `/export/investor`
+- Export views force day theme, render without sidebar, include document header (KOPIS logo, confidential/pre-pilot label, Print/Save PDF button)
+- Counsel Packet: legal queue, funds-flow map, counsel package output, workstreams, sequencing, patent strategy
+- Lender Pilot Brief: product definition, non-claims, pilot facts, MVP scope, pilot timeline, buyer matrix, GTM phases
+- Investor Brief: product thesis, product layers, competitive map, GTM logic, critical path, operating plan
+- Investor Kit page now has "Export packets" panel linking to all three
+
+Git:
+- `git init` done; two commits on main:
+  - `957624e` — initial app (all prior session work)
+  - latest — visual polish + export views
+
+### What Was Verified
+
+- `npm run build` clean for both commits (0 TS errors)
+- All 8 main routes screenshot-checked at 1440px
+- Export views screenshot-checked for all three types
+- Mobile (390px) — no overflow
+- Day mode — no overflow
+
+### Remaining Tasks
+
+- **Vercel deploy**: `git remote add origin` + `vercel` CLI or connect GitHub repo to Vercel
+- **App.tsx line count**: now ~1100 lines. Worth splitting page components to `src/pages/` if it grows further
+- **Investor Kit content**: Section 08 source was all upload UI + expired Perplexity URLs — no prose content to add. Placeholder is appropriate.
+- **ipapi.co CORS**: still shows in Playwright headless (not a real-browser issue)
+
+### Git State
+
+Branch: main (local only, no remote)
+Commits: 2
+No uncommitted changes
+
+---
+
+## 2026-05-22 Session 1 Summary
 
 ### What Changed
 
