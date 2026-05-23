@@ -1650,3 +1650,196 @@ td strong {
     display: none;
   }
 }
+
+/* ===  Export views === */
+
+.export-mode {
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+.export-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 0 2rem;
+  border-bottom: 1px solid var(--line-soft);
+  background: var(--glass-strong);
+  backdrop-filter: blur(18px) saturate(1.3);
+}
+
+.export-top-bar .brand {
+  border-color: transparent;
+  background: transparent;
+  border-radius: 0;
+}
+
+.export-back-hint {
+  color: var(--faint);
+  font-size: 0.78rem;
+}
+
+.export-shell {
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 2rem 2rem 5rem;
+}
+
+.export-shell .two-column {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.export-shell > .panel,
+.export-shell > .fact-grid,
+.export-shell > .two-column {
+  margin-bottom: 1rem;
+}
+
+.export-doc-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: start;
+  gap: 1.5rem;
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.export-doc-brand {
+  display: grid;
+  gap: 0.18rem;
+  min-height: 3.8rem;
+  align-content: center;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  background: var(--logo-bg);
+}
+
+.export-doc-brand .brand-word {
+  font-size: 1.28rem;
+}
+
+.export-doc-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.38rem;
+  margin-bottom: 0.3rem;
+  color: var(--faint);
+  font-size: 0.63rem;
+  font-weight: 780;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.export-doc-header h1 {
+  margin: 0 0 0.32rem;
+  font-family: 'Barlow Semi Condensed', ui-sans-serif, sans-serif;
+  font-size: 1.48rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.export-doc-header p {
+  margin: 0;
+  max-width: 52ch;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.export-print-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.44rem;
+  padding: 0.46rem 0.88rem;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--panel);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.export-print-btn:hover {
+  background: var(--panel-raised);
+}
+
+/* Export links on Investor Kit page */
+
+.export-link-grid {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.export-link {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.78rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 6px;
+  background: var(--panel-deep);
+  color: var(--text);
+  transition:
+    background 120ms ease,
+    border-color 120ms ease;
+}
+
+.export-link:hover {
+  border-color: color-mix(in oklch, var(--route-color, var(--blue)) 55%, var(--line));
+  background: color-mix(in oklch, var(--route-color, var(--blue)) 7%, var(--panel-deep));
+}
+
+.export-link > svg:first-child {
+  color: var(--route-color, var(--blue));
+}
+
+.export-link strong {
+  display: block;
+  font-size: 0.92rem;
+  color: var(--text);
+}
+
+.export-link p {
+  margin: 0.16rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.38;
+  color: var(--faint);
+}
+
+/* === Print styles === */
+
+@media print {
+  .export-top-bar,
+  .export-print-btn,
+  .ambient-field {
+    display: none !important;
+  }
+
+  .export-mode {
+    background: white;
+  }
+
+  .export-shell {
+    max-width: 100%;
+    padding: 0;
+  }
+
+  .panel,
+  .work-list article,
+  .table-wrap,
+  .document-grid article,
+  .fact-grid article {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

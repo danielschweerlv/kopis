@@ -821,6 +821,34 @@ function InvestorKitPage({
           </div>
         </Panel>
       </div>
+      <Panel title="Export packets" eyebrow="Print-ready views" icon={<Download size={18} aria-hidden="true" />}>
+        <div className="export-link-grid">
+          <a className="export-link" href="/export/counsel">
+            <Scale size={18} aria-hidden="true" />
+            <div>
+              <strong>Counsel Packet</strong>
+              <p>Legal queue, funds flow, workstreams, sequencing, and patent strategy.</p>
+            </div>
+            <ArrowRight size={16} aria-hidden="true" />
+          </a>
+          <a className="export-link" href="/export/lender">
+            <Gauge size={18} aria-hidden="true" />
+            <div>
+              <strong>Lender Pilot Brief</strong>
+              <p>Product overview, pilot scope, MVP, timeline, and buyer matrix.</p>
+            </div>
+            <ArrowRight size={16} aria-hidden="true" />
+          </a>
+          <a className="export-link" href="/export/investor">
+            <FolderOpen size={18} aria-hidden="true" />
+            <div>
+              <strong>Investor Brief</strong>
+              <p>Operating thesis, competitive map, GTM logic, critical path, operating plan.</p>
+            </div>
+            <ArrowRight size={16} aria-hidden="true" />
+          </a>
+        </div>
+      </Panel>
     </>
   );
 }
@@ -857,25 +885,172 @@ function RouteContent({
   }
 }
 
+function ExportDocumentHeader({
+  title,
+  subtitle,
+  icon: Icon,
+}: {
+  title: string;
+  subtitle: string;
+  icon: LucideIcon;
+}) {
+  return (
+    <header className="export-doc-header">
+      <div className="export-doc-brand">
+        <span className="brand-word">KOPIS</span>
+        <span className="brand-subtitle">War Room</span>
+      </div>
+      <div>
+        <div className="export-doc-eyebrow">
+          <Icon size={13} aria-hidden="true" />
+          <span>Confidential · Pre-pilot · All legal statements provisional until counsel review</span>
+        </div>
+        <h1>{title}</h1>
+        <p>{subtitle}</p>
+      </div>
+      <button className="export-print-btn" onClick={() => window.print()} type="button">
+        <Download size={14} aria-hidden="true" />
+        <span>Print / Save PDF</span>
+      </button>
+    </header>
+  );
+}
+
+function CounselPacketView() {
+  return (
+    <>
+      <ExportDocumentHeader
+        icon={Scale}
+        title="KOPIS Counsel Packet"
+        subtitle="Legal workstreams, counsel queue, funds-flow analysis, and sequencing. All items provisional until counsel review."
+      />
+      <div className="two-column">
+        <Panel title="Counsel queue" eyebrow="Questions to resolve">
+          <WorkList items={legalQuestions} />
+        </Panel>
+        <Panel title="Funds-flow map" eyebrow="Role discipline">
+          <MatrixTable rows={fundsFlowRows} headers={["Actor", "Function", "Open point"]} />
+        </Panel>
+      </div>
+      <Panel title="Counsel package output" eyebrow="Documents to produce">
+        <div className="document-grid">
+          <article>Five-state wage assignment and revocation memo</article>
+          <article>Money transmitter and control-of-funds analysis</article>
+          <article>Servicing role classification by pilot state</article>
+          <article>Middleware repayment terms review</article>
+          <article>Borrower authorization and revocation draft</article>
+          <article>IP claim screen for continuity and rules engine</article>
+        </div>
+      </Panel>
+      <Panel title="Legal workstreams" eyebrow="Eight tracks">
+        <WorkList items={legalWorkstreams} />
+      </Panel>
+      <Panel title="Legal sequencing" eyebrow="Eight steps">
+        <Timeline items={legalSequencing} />
+      </Panel>
+      <Panel title="Patent strategy" eyebrow="Narrow and defensible">
+        <WorkList items={patentAngles} />
+      </Panel>
+    </>
+  );
+}
+
+function LenderPilotView() {
+  return (
+    <>
+      <ExportDocumentHeader
+        icon={Gauge}
+        title="KOPIS Lender Pilot Brief"
+        subtitle="Product overview, pilot scope, MVP design, timeline, and success criteria for the first lender cohort."
+      />
+      <Panel title="What Kopis is" eyebrow="Product definition">
+        <WorkList items={whatIsKopis} />
+      </Panel>
+      <Panel title="Non-claims" eyebrow="Positioning guardrails">
+        <ul className="check-list">
+          {nonClaims.map((claim) => (
+            <li key={claim}>{claim}</li>
+          ))}
+        </ul>
+      </Panel>
+      <FactGrid items={pilotFacts} />
+      <div className="two-column">
+        <Panel title="MVP scope" eyebrow="Build versus defer">
+          <MatrixTable rows={mvpRows} headers={["Area", "Build", "Defer"]} />
+        </Panel>
+        <Panel title="Pilot timeline" eyebrow="Near-term sequence">
+          <Timeline items={pilotTimeline} />
+        </Panel>
+      </div>
+      <Panel title="What each buyer cares about" eyebrow="Buyer matrix">
+        <MatrixTable rows={buyerNeeds} headers={["Buyer", "Primary concern", ""]} />
+      </Panel>
+      <Panel title="GTM phases" eyebrow="Commercial path">
+        <Timeline items={gtmPhases} />
+      </Panel>
+    </>
+  );
+}
+
+function InvestorBriefView() {
+  return (
+    <>
+      <ExportDocumentHeader
+        icon={FolderOpen}
+        title="KOPIS Investor Brief"
+        subtitle="Operating thesis, market wedge, competitive position, and execution path. Pilot proof pending."
+      />
+      <Panel title="What Kopis is" eyebrow="Product thesis">
+        <WorkList items={whatIsKopis} />
+      </Panel>
+      <Panel title="Product layers" eyebrow="Operating stack">
+        <MatrixTable rows={productLayers} headers={["Layer", "What it owns", "Why it matters"]} />
+      </Panel>
+      <Panel title="Competitive map" eyebrow="Landscape">
+        <MatrixTable rows={competitorRows} headers={["Category", "Examples", "What they own", "Kopis wedge"]} />
+      </Panel>
+      <div className="two-column">
+        <Panel title="GTM operating logic" eyebrow="Lender-led">
+          <WorkList items={growthItems} />
+        </Panel>
+        <Panel title="GTM phases" eyebrow="Commercial path">
+          <Timeline items={gtmPhases} />
+        </Panel>
+      </div>
+      <Panel title="Critical path" eyebrow="Sequenced steps">
+        <WorkList items={criticalPath} />
+      </Panel>
+      <Panel title="Operating plan" eyebrow="7 · 30 · 90 days">
+        <Timeline items={operatingPlan} />
+      </Panel>
+    </>
+  );
+}
+
 function App() {
   const [activeRoute, setActiveRoute] = useState(() => resolveRoute(window.location.pathname));
   const [theme, setTheme] = useState<ThemeMode>("night");
+  const [pathname, setPathname] = useState(window.location.pathname);
 
   useEffect(() => {
-    const handlePopState = () => setActiveRoute(resolveRoute(window.location.pathname));
+    const handlePopState = () => {
+      const path = window.location.pathname;
+      setPathname(path);
+      setActiveRoute(resolveRoute(path));
+    };
     window.addEventListener("popstate", handlePopState);
-
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
   useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-  }, [theme]);
+    document.documentElement.dataset.theme = pathname.startsWith("/export/") ? "day" : theme;
+  }, [theme, pathname]);
 
   const navigate = (path: string) => {
     if (window.location.pathname !== path) {
       window.history.pushState({}, "", path);
     }
+    setPathname(path);
     setActiveRoute(resolveRoute(path));
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -888,6 +1063,27 @@ function App() {
     event.preventDefault();
     navigate(path);
   };
+
+  const exportType = pathname.startsWith("/export/") ? pathname.slice("/export/".length) : null;
+  if (exportType !== null) {
+    return (
+      <main className="export-mode" data-theme="day">
+        <AmbientField />
+        <header className="export-top-bar">
+          <a className="brand" href="/command-brief" onClick={(e) => handleNavigate(e, "/command-brief")}>
+            <span className="brand-word">KOPIS</span>
+            <span className="brand-subtitle">War Room</span>
+          </a>
+          <span className="export-back-hint">Export view — ⌘P or browser Print to save as PDF</span>
+        </header>
+        <div className="export-shell">
+          {exportType === "counsel" && <CounselPacketView />}
+          {exportType === "lender" && <LenderPilotView />}
+          {exportType === "investor" && <InvestorBriefView />}
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className={`app-shell ${activeRoute.id === "command-brief" ? "landing-shell" : ""}`} data-theme={theme}>
