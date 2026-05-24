@@ -72,6 +72,21 @@ import {
 
 type ThemeMode = "night" | "day";
 
+const DAY_UNICORN_PROJECT_ID = "qTiAlX0sxkuBOAiL7qHL";
+const UNICORN_SCRIPT_ID = "unicorn-studio-runtime";
+const UNICORN_SCRIPT_SRC =
+  "https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.4.29/dist/unicornStudio.umd.js";
+const NIGHT_SPLINE_URL = "https://my.spline.design/liquidgradientabstractbackground-gEjylYLumN1b1CUcuIb8DyUA";
+
+declare global {
+  interface Window {
+    UnicornStudio?: {
+      init?: () => void;
+      isInitialized?: boolean;
+    };
+  }
+}
+
 const iconByRoute: Record<RouteId, LucideIcon> = {
   "command-brief": Target,
   "what-is-kopis": FileText,
@@ -103,11 +118,24 @@ function resolveRoute(pathname: string) {
   return routeByPath.get(pathname) ?? routes[0];
 }
 
-function LogoMark() {
+function LogoMark({
+  theme,
+  onNavigate,
+}: {
+  theme: ThemeMode;
+  onNavigate?: (event: React.MouseEvent<HTMLAnchorElement>, path: string) => void;
+}) {
+  const logoSrc = theme === "day" ? "/brand/kopis-logo-day.png" : "/brand/kopis-logo-night.png";
+
   return (
-    <a className="brand" href="/command-brief" aria-label="KOPIS War Room home">
-      <span className="brand-word" aria-hidden="true">
-        KOPIS
+    <a
+      className="brand"
+      href="/command-brief"
+      onClick={onNavigate ? (event) => onNavigate(event, "/command-brief") : undefined}
+      aria-label="KOPIS War Room home"
+    >
+      <span className="brand-logo-shell" aria-hidden="true">
+        <img className="brand-logo" src={logoSrc} alt="" />
       </span>
       <span className="brand-subtitle">War Room</span>
     </a>
@@ -173,24 +201,79 @@ function NavLink({
   );
 }
 
-function AmbientField() {
+function useUnicornStudio() {
+  useEffect(() => {
+    let cancelled = false;
+
+    const initialize = () => {
+      if (cancelled || !window.UnicornStudio?.init || window.UnicornStudio.isInitialized) {
+        return;
+      }
+
+      window.UnicornStudio.init();
+      window.UnicornStudio.isInitialized = true;
+    };
+
+    const existingScript = document.getElementById(UNICORN_SCRIPT_ID) as HTMLScriptElement | null;
+
+    if (existingScript) {
+      if (window.UnicornStudio?.init) {
+        initialize();
+      } else {
+        existingScript.addEventListener("load", initialize, { once: true });
+      }
+
+      return () => {
+        cancelled = true;
+        existingScript.removeEventListener("load", initialize);
+      };
+    }
+
+    window.UnicornStudio = window.UnicornStudio ?? { isInitialized: false };
+
+    const script = document.createElement("script");
+    script.id = UNICORN_SCRIPT_ID;
+    script.src = UNICORN_SCRIPT_SRC;
+    script.async = true;
+    script.onload = initialize;
+    (document.head || document.body).appendChild(script);
+
+    return () => {
+      cancelled = true;
+      script.removeEventListener("load", initialize);
+    };
+  }, []);
+}
+
+function AmbientField({ theme }: { theme: ThemeMode }) {
+  useUnicornStudio();
+
   return (
-    <div className="ambient-field" aria-hidden="true">
-      <div className="ambient-wave" />
-      <div className="ambient-grid ambient-grid-a" />
-      <div className="ambient-grid ambient-grid-b" />
+    <div className="ambient-field" data-theme={theme} aria-hidden="true">
+      <div className="ambient-layer ambient-layer-day" style={{ opacity: theme === "day" ? 1 : 0 }}>
+        <div className="unicorn-background" data-us-project={DAY_UNICORN_PROJECT_ID} />
+      </div>
+      <div className="ambient-layer ambient-layer-night" style={{ opacity: theme === "night" ? 1 : 0 }}>
+        <iframe
+          allow="autoplay; fullscreen"
+          className="spline-background"
+          frameBorder="0"
+          id="aura-spline"
+          loading="eager"
+          src={NIGHT_SPLINE_URL}
+          title="KOPIS night ambient background"
+        />
+      </div>
+      <div className="ambient-fallback" />
+      <div className="ambient-scrim" />
     </div>
   );
 }
 
 function TopBar({
   activeRoute,
-  theme,
-  onThemeChange,
 }: {
   activeRoute: RouteDefinition;
-  theme: ThemeMode;
-  onThemeChange: (theme: ThemeMode) => void;
 }) {
   const clock = useIpClock();
 
@@ -209,7 +292,43 @@ function TopBar({
         <span>Active room</span>
         <strong>{activeRoute.label}</strong>
       </div>
-      <ThemeToggle compact onThemeChange={onThemeChange} theme={theme} />
+    </header>
+  );
+}
+
+function NavigationHeader({
+  activeRoute,
+  theme,
+  onThemeChange,
+  onNavigate,
+}: {
+  activeRoute: RouteDefinition;
+  theme: ThemeMode;
+  onThemeChange: (theme: ThemeMode) => void;
+  onNavigate: (event: React.MouseEvent<HTMLAnchorElement>, path: string) => void;
+}) {
+  return (
+    <header className="site-header" aria-label="KOPIS navigation">
+      <div className="site-header-sheen" aria-hidden="true" />
+      <nav className="site-nav">
+        <LogoMark theme={theme} onNavigate={onNavigate} />
+        <div className="site-nav-links" aria-label="War Room routes">
+          {routes.map((route) => (
+            <NavLink active={activeRoute.id === route.id} key={route.id} onNavigate={onNavigate} route={route} />
+          ))}
+        </div>
+        <div className="site-header-actions">
+          <ThemeToggle compact onThemeChange={onThemeChange} theme={theme} />
+          <a
+            className="war-room-cta"
+            href="/command-brief"
+            onClick={(event) => onNavigate(event, "/command-brief")}
+          >
+            <span>Command Brief</span>
+            <ArrowRight size={18} aria-hidden="true" />
+          </a>
+        </div>
+      </nav>
     </header>
   );
 }
@@ -441,15 +560,20 @@ function DottedFrame({ children, label, className = "" }: { children: ReactNode;
 
 function AudioVisualizer({ compact = false }: { compact?: boolean }) {
   const bars = useMemo(
-    () =>
-      Array.from({ length: compact ? 88 : 172 }, (_, index) => {
-        const center = (compact ? 88 : 172) / 2;
+    () => {
+      const barCount = compact ? 88 : 86;
+      const peakHeight = compact ? 118 : 122;
+      const minHeight = compact ? 8 : 4;
+
+      return Array.from({ length: barCount }, (_, index) => {
+        const center = barCount / 2;
         const distance = Math.abs(index - center) / center;
         const pulse = Math.abs(Math.sin(index * 0.61)) * 0.7 + Math.abs(Math.sin(index * 0.19)) * 0.5;
         const envelope = Math.max(0.03, Math.pow(1 - distance, 1.45));
-        const height = Math.max(8, envelope * (compact ? 118 : 244) * (0.44 + pulse));
+        const height = Math.max(minHeight, envelope * peakHeight * (0.44 + pulse));
         return { index, height };
-      }),
+      });
+    },
     [compact],
   );
 
@@ -541,12 +665,8 @@ function BriefStatusChip({
 
 function CommandBriefPage({
   onNavigate,
-  theme,
-  onThemeChange,
 }: {
   onNavigate: (path: string) => void;
-  theme: ThemeMode;
-  onThemeChange: (theme: ThemeMode) => void;
 }) {
   return (
     <section className="landing-stage">
@@ -568,7 +688,6 @@ function CommandBriefPage({
             <BriefStatusChip label="Legal" value="Counsel gates open" variant="amber" />
             <BriefStatusChip label="Pilot target" value="Mid-market installment" variant="blue" />
           </div>
-          <ThemeToggle onThemeChange={onThemeChange} theme={theme} />
         </div>
         <AudioVisualizer />
       </section>
@@ -881,7 +1000,7 @@ function RouteContent({
       return <InvestorKitPage onThemeChange={onThemeChange} theme={theme} />;
     case "command-brief":
     default:
-      return <CommandBriefPage onNavigate={onNavigate} onThemeChange={onThemeChange} theme={theme} />;
+      return <CommandBriefPage onNavigate={onNavigate} />;
   }
 }
 
@@ -1068,12 +1187,9 @@ function App() {
   if (exportType !== null) {
     return (
       <main className="export-mode" data-theme="day">
-        <AmbientField />
+        <AmbientField theme="day" />
         <header className="export-top-bar">
-          <a className="brand" href="/command-brief" onClick={(e) => handleNavigate(e, "/command-brief")}>
-            <span className="brand-word">KOPIS</span>
-            <span className="brand-subtitle">War Room</span>
-          </a>
+          <LogoMark theme="day" onNavigate={handleNavigate} />
           <span className="export-back-hint">Export view — ⌘P or browser Print to save as PDF</span>
         </header>
         <div className="export-shell">
@@ -1087,36 +1203,16 @@ function App() {
 
   return (
     <main className={`app-shell ${activeRoute.id === "command-brief" ? "landing-shell" : ""}`} data-theme={theme}>
-      <AmbientField />
-      <aside className="side-rail" aria-label="KOPIS navigation">
-        <LogoMark />
-        <nav>
-          {routes.map((route) => (
-            <NavLink
-              active={activeRoute.id === route.id}
-              key={route.id}
-              onNavigate={handleNavigate}
-              route={route}
-            />
-          ))}
-        </nav>
-        <a
-          className="war-room-cta"
-          href="/command-brief"
-          onClick={(event) => handleNavigate(event, "/command-brief")}
-        >
-          <span>Enter War Room</span>
-          <ArrowRight size={18} aria-hidden="true" />
-        </a>
-        <div className="rail-footer">
-          <span>Operating frame</span>
-          <strong>Lender infrastructure</strong>
-          <p>Neutral orchestration, consent, servicing, reconciliation, and continuity for third-party lenders.</p>
-        </div>
-      </aside>
+      <AmbientField theme={theme} />
+      <NavigationHeader
+        activeRoute={activeRoute}
+        onNavigate={handleNavigate}
+        onThemeChange={setTheme}
+        theme={theme}
+      />
       <section className="content-shell">
         {activeRoute.id !== "command-brief" && (
-          <TopBar activeRoute={activeRoute} onThemeChange={setTheme} theme={theme} />
+          <TopBar activeRoute={activeRoute} />
         )}
         <RouteContent route={activeRoute} onNavigate={navigate} onThemeChange={setTheme} theme={theme} />
       </section>

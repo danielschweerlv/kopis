@@ -1,8 +1,9 @@
 :root {
   color-scheme: dark;
+  --font-body: "Manrope", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-display: "Syncopate", var(--font-body);
   font-family:
-    'Karla', ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
-    sans-serif;
+    var(--font-body);
   color: oklch(93% 0.011 255);
   background: oklch(14% 0.019 248);
   --bg: oklch(14% 0.019 248);
@@ -28,7 +29,8 @@
   --glass-strong: oklch(18% 0.024 248 / 82%);
   --logo-bg: oklch(95% 0.013 80);
   --logo-text: oklch(22% 0.05 250);
-  --nav-bg: oklch(10% 0.02 248 / 94%);
+  --nav-bg: oklch(8.5% 0.017 248 / 88%);
+  --nav-border: oklch(100% 0 0 / 14%);
   --page-glow: oklch(36% 0.13 272 / 42%);
   --radius: 8px;
   --shadow: 0 20px 60px oklch(5% 0.018 248 / 52%);
@@ -59,7 +61,8 @@
   --glass-strong: oklch(100% 0 0 / 85%);
   --logo-bg: oklch(99% 0.006 80);
   --logo-text: oklch(18% 0.05 250);
-  --nav-bg: oklch(100% 0 0 / 92%);
+  --nav-bg: oklch(94.8% 0.014 80 / 90%);
+  --nav-border: oklch(15% 0.03 248 / 12%);
   --page-glow: oklch(78% 0.06 248 / 22%);
   --shadow: 0 20px 60px oklch(65% 0.02 248 / 18%);
 }
@@ -126,19 +129,27 @@ p {
 
 .app-shell {
   position: relative;
-  display: grid;
-  grid-template-columns: 15.25rem minmax(0, 1fr);
+  isolation: isolate;
+  display: block;
   min-height: 100vh;
-  overflow: hidden;
+  overflow-x: hidden;
   background:
-    radial-gradient(circle at 78% 4%, var(--page-glow), transparent 38rem),
-    linear-gradient(180deg, var(--bg), color-mix(in oklch, var(--bg) 82%, oklch(6% 0.015 248)) 62rem);
+    linear-gradient(180deg, oklch(11% 0.019 248 / 78%), oklch(9% 0.018 248 / 90%) 62rem),
+    color-mix(in oklch, var(--bg) 58%, transparent);
 }
 
 .app-shell[data-theme="day"] {
   background:
-    radial-gradient(circle at 78% 4%, oklch(88% 0.06 248 / 16%), transparent 36rem),
-    linear-gradient(180deg, oklch(100% 0 0), oklch(99% 0.004 248) 60rem);
+    linear-gradient(180deg, oklch(100% 0 0 / 70%), oklch(98% 0.005 248 / 88%) 60rem),
+    oklch(100% 0 0 / 44%);
+}
+
+.app-shell > .site-header,
+.app-shell > .content-shell,
+.export-top-bar,
+.export-shell {
+  position: relative;
+  z-index: 1;
 }
 
 :root[data-theme="day"] .route-card {
@@ -163,9 +174,89 @@ p {
 .ambient-field {
   position: fixed;
   inset: 0;
-  z-index: -1;
+  z-index: 0;
   overflow: hidden;
   pointer-events: none;
+  background:
+    radial-gradient(circle at 78% 4%, oklch(36% 0.13 272 / 24%), transparent 38rem),
+    linear-gradient(180deg, var(--bg), color-mix(in oklch, var(--bg) 82%, oklch(6% 0.015 248)) 62rem);
+}
+
+.ambient-layer,
+.ambient-fallback,
+.ambient-scrim {
+  position: absolute;
+  inset: 0;
+}
+
+.ambient-layer {
+  opacity: 0;
+}
+
+.ambient-field[data-theme="day"] .ambient-layer-day,
+.ambient-field[data-theme="night"] .ambient-layer-night {
+  opacity: 1;
+}
+
+.unicorn-background,
+.unicorn-background canvas,
+.spline-background {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ambient-layer-day {
+  background: oklch(98% 0.006 248);
+  filter: saturate(0.72) contrast(0.94) brightness(1.02);
+}
+
+.ambient-layer-night {
+  background: oklch(10% 0.019 248);
+}
+
+.spline-background {
+  border: 0;
+  filter: saturate(0.58) contrast(0.92) brightness(0.58);
+  transform: scale(1.03);
+  transform-origin: center;
+}
+
+.ambient-fallback {
+  opacity: 0.5;
+  background:
+    repeating-linear-gradient(
+      173deg,
+      transparent 0 8px,
+      oklch(79% 0.13 254 / 18%) 9px,
+      oklch(79% 0.13 254 / 18%) 10px,
+      transparent 11px 19px
+    ),
+    radial-gradient(42rem 12rem at 72% 10%, var(--coral), transparent 66%),
+    radial-gradient(42rem 13rem at 43% 16%, var(--blue), transparent 68%),
+    radial-gradient(38rem 16rem at 88% 18%, var(--amber), transparent 64%);
+  filter: blur(0.2px);
+  transform: rotate(-5deg) scale(1.08);
+  animation: ambientShift 16s ease-in-out infinite alternate;
+}
+
+.ambient-field[data-theme="day"] .ambient-fallback {
+  opacity: 0.18;
+  background:
+    radial-gradient(circle at 84% 2%, oklch(83% 0.055 158 / 24%), transparent 30rem),
+    radial-gradient(circle at 22% 22%, oklch(78% 0.055 230 / 16%), transparent 28rem);
+}
+
+.ambient-scrim {
+  background:
+    linear-gradient(90deg, oklch(10% 0.019 248 / 92%) 0%, oklch(12% 0.02 248 / 74%) 38%, oklch(10% 0.019 248 / 88%) 100%),
+    radial-gradient(circle at 76% 8%, oklch(73% 0.14 158 / 9%), transparent 34rem);
+}
+
+.ambient-field[data-theme="day"] .ambient-scrim {
+  background:
+    linear-gradient(90deg, oklch(100% 0 0 / 92%) 0%, oklch(100% 0 0 / 72%) 42%, oklch(98% 0.005 248 / 88%) 100%),
+    radial-gradient(circle at 76% 8%, oklch(73% 0.14 158 / 8%), transparent 32rem);
 }
 
 .ambient-wave {
@@ -228,100 +319,174 @@ p {
   }
 }
 
-.side-rail {
+.site-header {
   position: sticky;
   top: 0;
-  display: flex;
-  height: 100vh;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 0.9rem;
-  border-right: 1px solid var(--line-soft);
+  z-index: 50;
+  overflow: hidden;
+  border-bottom: 1px solid var(--nav-border);
   background:
-    linear-gradient(180deg, color-mix(in oklch, var(--rail) 86%, var(--panel)), var(--rail)),
-    var(--rail);
+    radial-gradient(circle at top, color-mix(in oklch, var(--panel-raised) 44%, transparent), transparent 34rem),
+    linear-gradient(180deg, color-mix(in oklch, white 8%, transparent), transparent),
+    var(--nav-bg);
+  box-shadow: 0 18px 48px oklch(5% 0.018 248 / 34%);
+  backdrop-filter: blur(18px) saturate(1.15);
+  -webkit-backdrop-filter: blur(18px) saturate(1.15);
+}
+
+:root[data-theme="day"] .site-header {
+  background:
+    radial-gradient(circle at top, oklch(100% 0 0 / 48%), transparent 32rem),
+    linear-gradient(180deg, oklch(100% 0 0 / 24%), transparent),
+    var(--nav-bg);
+  box-shadow: 0 14px 36px oklch(58% 0.02 248 / 15%);
+}
+
+.site-header-sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, oklch(100% 0 0 / 6%), transparent 78%);
+}
+
+.site-nav {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: min(100%, 1560px);
+  min-height: 4.35rem;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: clamp(0.9rem, 2.2vw, 2rem);
+  align-items: center;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 2.6vw, 2rem);
 }
 
 .brand {
-  display: grid;
-  gap: 0.18rem;
-  min-height: 3rem;
-  padding: 0.62rem 0.7rem;
-  border: 1px solid var(--line-soft);
-  border-radius: var(--radius);
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.7rem;
+  color: var(--text);
+}
+
+.brand-logo-shell {
+  display: inline-flex;
+  width: clamp(8.6rem, 11vw, 11.8rem);
+  height: 2.72rem;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklch, var(--nav-border) 68%, transparent);
   background: var(--logo-bg);
 }
 
-.brand-word {
-  color: var(--logo-text);
-  font-size: 1.52rem;
-  font-weight: 780;
-  letter-spacing: 0.36em;
-  line-height: 1;
+.brand-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .brand-subtitle {
-  color: color-mix(in oklch, var(--logo-text) 62%, transparent);
-  font-size: 0.68rem;
-  font-weight: 740;
+  color: color-mix(in oklch, var(--text) 68%, transparent);
+  font-family: var(--font-display);
+  font-size: 0.56rem;
+  font-weight: 700;
+  line-height: 1.25;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
-.side-rail nav {
-  display: grid;
-  gap: 0.25rem;
+.site-nav-links {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.16rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.site-nav-links::-webkit-scrollbar {
+  display: none;
 }
 
 .nav-link {
-  display: grid;
-  grid-template-columns: 1.3rem minmax(0, 1fr);
-  gap: 0.56rem;
-  align-items: center;
+  display: inline-flex;
+  flex: 0 0 auto;
   min-height: 2.42rem;
-  padding: 0 0.62rem;
+  align-items: center;
+  gap: 0.42rem;
+  padding: 0 0.58rem;
   border: 1px solid transparent;
-  border-radius: 6px;
-  color: var(--muted);
-  font-size: 0.84rem;
+  border-radius: 999px;
+  color: color-mix(in oklch, var(--text) 74%, var(--muted));
+  font-family: var(--font-display);
+  font-size: clamp(0.52rem, 0.58vw, 0.66rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  text-transform: uppercase;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    color 160ms ease;
 }
 
 .nav-link svg {
-  color: var(--route-color, var(--blue));
+  width: 0.88rem;
+  height: 0.88rem;
+  color: var(--route-color, var(--green));
 }
 
 .nav-link:hover {
-  border-color: var(--line-soft);
-  background: color-mix(in oklch, var(--panel-raised) 82%, transparent);
+  border-color: color-mix(in oklch, var(--route-color, var(--green)) 34%, var(--line-soft));
+  background: color-mix(in oklch, var(--panel-raised) 58%, transparent);
   color: var(--text);
 }
 
 .nav-link[aria-current="page"] {
-  border-color: color-mix(in oklch, var(--route-color, var(--blue)) 62%, var(--line));
+  border-color: color-mix(in oklch, var(--route-color, var(--green)) 60%, var(--line));
   background:
-    radial-gradient(circle at 0 50%, color-mix(in oklch, var(--route-color, var(--blue)) 30%, transparent), transparent 12rem),
-    var(--panel);
+    radial-gradient(circle at 12% 50%, color-mix(in oklch, var(--route-color, var(--green)) 22%, transparent), transparent 8rem),
+    color-mix(in oklch, var(--panel-raised) 78%, transparent);
   color: var(--text);
+}
+
+.site-header-actions {
+  display: flex;
+  min-width: max-content;
+  align-items: center;
+  gap: 0.65rem;
 }
 
 .war-room-cta {
   display: inline-flex;
-  min-height: 2.65rem;
+  min-height: 2.36rem;
   align-items: center;
   justify-content: center;
-  gap: 0.65rem;
-  padding: 0 1.05rem;
-  border: 1px solid color-mix(in oklch, var(--blue) 68%, var(--line));
-  border-radius: 3px;
-  background: linear-gradient(135deg, color-mix(in oklch, var(--blue) 90%, white), oklch(54% 0.21 258));
-  color: white;
-  font-size: 0.84rem;
-  font-weight: 760;
-  box-shadow: 0 14px 32px oklch(49% 0.18 258 / 28%);
+  gap: 0.52rem;
+  padding: 0 0.9rem;
+  border: 1px solid color-mix(in oklch, var(--green) 58%, var(--line));
+  border-radius: 999px;
+  background:
+    linear-gradient(135deg, color-mix(in oklch, var(--green) 28%, transparent), transparent),
+    color-mix(in oklch, var(--panel-raised) 84%, transparent);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: 0 12px 26px oklch(24% 0.08 158 / 18%);
 }
 
 .war-room-cta:hover {
-  filter: brightness(1.06);
+  background:
+    linear-gradient(135deg, color-mix(in oklch, var(--green) 42%, transparent), transparent),
+    color-mix(in oklch, var(--panel-raised) 92%, transparent);
 }
 
 [data-accent="blue"] {
@@ -348,15 +513,6 @@ p {
   --route-color: var(--amber);
 }
 
-.rail-footer {
-  margin-top: auto;
-  padding: 0.85rem;
-  border: 1px solid var(--line-soft);
-  border-radius: var(--radius);
-  background: var(--panel-deep);
-}
-
-.rail-footer span,
 .eyebrow,
 .top-bar span,
 .fact-grid span,
@@ -370,21 +526,9 @@ p {
   text-transform: uppercase;
 }
 
-.rail-footer strong {
-  display: block;
-  margin-top: 0.35rem;
-  color: var(--text);
-  font-size: 0.9rem;
-}
-
-.rail-footer p {
-  margin: 0.4rem 0 0;
-  font-size: 0.79rem;
-  line-height: 1.42;
-}
-
 .content-shell {
   width: min(100%, 1560px);
+  margin: 0 auto;
   padding: 1rem 1.2rem 3rem;
 }
 
@@ -393,80 +537,9 @@ p {
   min-height: 100vh;
 }
 
-.landing-shell .side-rail {
-  position: relative;
-  z-index: 10;
-  display: grid;
-  grid-template-columns: minmax(14rem, 17.5rem) minmax(0, 1fr) auto;
-  height: auto;
-  gap: 1.1rem;
-  align-items: center;
-  padding: 0;
-  border-right: 0;
-  border-bottom: 1px solid var(--line-soft);
-  background: var(--nav-bg);
-  backdrop-filter: blur(24px) saturate(1.3);
-}
-
-.landing-shell .brand {
-  min-height: 4.25rem;
-  height: 100%;
-  align-content: center;
-  padding: 0 2rem;
-  border-color: transparent;
-  border-radius: 0;
-  background: var(--logo-bg);
-}
-
-.landing-shell .brand-word {
-  font-size: clamp(1.7rem, 2.15vw, 2.15rem);
-  letter-spacing: 0.42em;
-}
-
-.landing-shell .brand-subtitle {
-  display: none;
-}
-
-.landing-shell .side-rail nav {
-  display: flex;
-  justify-content: center;
-  gap: 1.75rem;
-  overflow-x: auto;
-}
-
-.landing-shell .nav-link {
-  grid-template-columns: auto minmax(0, auto);
-  flex: 0 0 auto;
-  min-height: 4.25rem;
-  padding: 0 0.1rem;
-  border-radius: 0;
-  color: color-mix(in oklch, var(--text) 92%, var(--muted));
-  font-weight: 670;
-}
-
-.landing-shell .nav-link svg {
-  display: none;
-}
-
-.landing-shell .nav-link[aria-current="page"],
-.landing-shell .nav-link:hover {
-  border-color: transparent;
-  background: transparent;
-  color: var(--text);
-}
-
-.landing-shell .war-room-cta {
-  margin-right: 2.1rem;
-  min-width: 12.2rem;
-}
-
-.landing-shell .rail-footer {
-  display: none;
-}
-
 .landing-shell .content-shell {
   width: min(100%, 1680px);
-  min-height: calc(100vh - 4.25rem);
+  min-height: calc(100vh - 4.35rem);
   margin: 0 auto;
   padding: 0 1.2rem 1.45rem;
 }
@@ -480,7 +553,7 @@ p {
   top: 0;
   z-index: 5;
   display: grid;
-  grid-template-columns: 0.9fr 0.9fr 1.1fr auto;
+  grid-template-columns: 0.9fr 0.9fr 1.1fr;
   gap: 1px;
   overflow: hidden;
   margin-bottom: 1rem;
@@ -551,8 +624,11 @@ p {
   background: transparent;
   color: var(--muted);
   cursor: pointer;
+  font-family: var(--font-display);
   font-size: 0.78rem;
-  font-weight: 760;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: uppercase;
 }
 
 .theme-toggle button[aria-pressed="true"] {
@@ -599,11 +675,12 @@ p {
 .landing-copy h1 {
   margin: 0.24rem 0 0.5rem;
   color: var(--text);
-  font-family: 'Barlow Semi Condensed', ui-sans-serif, sans-serif;
+  font-family: var(--font-display);
   font-size: 2.55rem;
-  font-weight: 600;
+  font-weight: 400;
   line-height: 1.02;
-  letter-spacing: -0.01em;
+  letter-spacing: 0;
+  text-transform: uppercase;
 }
 
 .page-header p,
@@ -633,7 +710,7 @@ p {
 }
 
 .landing-stage {
-  min-height: calc(100vh - 4.25rem);
+  min-height: calc(100vh - 4.35rem);
   padding-top: 0;
 }
 
@@ -646,10 +723,10 @@ p {
   border: 0;
   border-radius: 0;
   background:
-    linear-gradient(180deg, color-mix(in oklch, var(--bg) 62%, transparent), var(--bg)),
-    radial-gradient(circle at 76% 10%, var(--page-glow), transparent 36rem),
-    radial-gradient(circle at 22% 32%, color-mix(in oklch, var(--blue) 14%, transparent), transparent 24rem);
+    linear-gradient(90deg, color-mix(in oklch, var(--bg) 86%, transparent), color-mix(in oklch, var(--bg) 58%, transparent)),
+    linear-gradient(180deg, color-mix(in oklch, var(--bg) 60%, transparent), color-mix(in oklch, var(--bg) 82%, transparent));
   box-shadow: none;
+  backdrop-filter: blur(4px) saturate(0.94);
 }
 
 .landing-shell .landing-grid::before {
@@ -659,7 +736,7 @@ p {
   width: min(78rem, 78vw);
   height: 20rem;
   content: "";
-  opacity: 0.88;
+  opacity: 0.16;
   background:
     repeating-linear-gradient(
       174deg,
@@ -676,8 +753,14 @@ p {
   pointer-events: none;
 }
 
+:root[data-theme="day"] .landing-shell .landing-grid {
+  background:
+    linear-gradient(90deg, oklch(100% 0 0 / 90%), oklch(100% 0 0 / 60%)),
+    linear-gradient(180deg, oklch(100% 0 0 / 56%), oklch(98% 0.004 248 / 78%));
+}
+
 :root[data-theme="day"] .landing-shell .landing-grid::before {
-  opacity: 0.42;
+  opacity: 0.18;
 }
 
 .landing-copy {
@@ -787,8 +870,12 @@ p {
 .panel h2 {
   margin: 0.2rem 0 0;
   color: var(--text);
+  font-family: var(--font-display);
   font-size: 1.05rem;
+  font-weight: 400;
   line-height: 1.16;
+  letter-spacing: 0;
+  text-transform: uppercase;
 }
 
 .panel-icon {
@@ -1240,6 +1327,7 @@ td strong {
 .landing-shell .audio-frame {
   min-height: 100%;
   grid-template-rows: 1fr;
+  place-items: center;
   align-self: stretch;
   border: 0;
   border-radius: 14px;
@@ -1271,8 +1359,10 @@ td strong {
 }
 
 .landing-shell .waveform {
-  min-height: 100%;
-  padding: 0 2.2rem;
+  width: min(38rem, 100%);
+  min-height: clamp(12rem, 30vh, 18rem);
+  gap: 3px;
+  padding: 0 1.1rem;
 }
 
 .audio-frame.compact .waveform {
@@ -1281,12 +1371,12 @@ td strong {
 
 .waveform span {
   --waveform-hue: calc(258deg + var(--dot-i, 0) * 0.76deg);
-  width: 4px;
+  width: 3px;
   height: var(--dot-h);
-  min-height: 8px;
+  min-height: 4px;
   border-radius: 0;
-  background-image: radial-gradient(circle, currentColor 1.6px, transparent 2px);
-  background-size: 4px 8px;
+  background-image: radial-gradient(circle, currentColor 1.2px, transparent 1.6px);
+  background-size: 3px 6px;
   background-position: center;
   color: oklch(71% 0.19 var(--waveform-hue));
   box-shadow: 0 0 16px color-mix(in oklch, currentColor 50%, transparent);
@@ -1294,23 +1384,31 @@ td strong {
   animation-delay: calc(var(--dot-h) * -0.012s);
 }
 
+.audio-frame.compact .waveform span {
+  width: 4px;
+  min-height: 8px;
+  background-image: radial-gradient(circle, currentColor 1.6px, transparent 2px);
+  background-size: 4px 8px;
+}
+
 .landing-shell .waveform::before {
   position: absolute;
-  right: 2.2rem;
-  left: 2.2rem;
+  left: 50%;
   top: 50%;
+  width: min(38rem, calc(100% - 2.2rem));
   height: 4px;
   content: "";
   background-image: radial-gradient(circle, oklch(78% 0.18 258) 1.5px, transparent 2px);
   background-size: 9px 4px;
   opacity: 0.72;
+  transform: translateX(-50%);
 }
 
 .landing-shell .waveform::after {
   position: absolute;
-  right: 2.2rem;
-  left: 2.2rem;
+  left: 50%;
   top: calc(50% - 1px);
+  width: min(38rem, calc(100% - 2.2rem));
   height: 2px;
   content: "";
   background: linear-gradient(90deg,
@@ -1323,6 +1421,7 @@ td strong {
   );
   opacity: 0.18;
   filter: blur(1px);
+  transform: translateX(-50%);
 }
 
 @keyframes waveformPulse {
@@ -1634,6 +1733,15 @@ td strong {
     width: 2px;
   }
 
+  .landing-shell .waveform {
+    gap: 3px;
+    overflow: hidden;
+  }
+
+  .landing-shell .waveform span:nth-child(odd) {
+    display: none;
+  }
+
   .route-card {
     min-height: 11rem;
   }
@@ -1651,11 +1759,230 @@ td strong {
   }
 }
 
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  width: 100%;
+  overflow: hidden;
+  border-bottom: 1px solid var(--nav-border);
+  background:
+    radial-gradient(circle at top, oklch(100% 0 0 / 18%), transparent 42rem),
+    linear-gradient(180deg, oklch(11% 0.018 248 / 88%), oklch(8.5% 0.017 248 / 78%));
+  box-shadow: 0 18px 56px oklch(0% 0 0 / 28%);
+  backdrop-filter: blur(18px) saturate(1.22);
+}
+
+:root[data-theme="day"] .site-header {
+  background:
+    radial-gradient(circle at top, oklch(100% 0 0 / 74%), transparent 42rem),
+    linear-gradient(180deg, oklch(96% 0.014 80 / 90%), oklch(92.5% 0.018 80 / 76%));
+  box-shadow: 0 18px 44px oklch(50% 0.018 80 / 14%);
+}
+
+.site-header-sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, oklch(100% 0 0 / 7%), transparent);
+}
+
+.site-nav {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: clamp(0.55rem, 1vw, 1rem);
+  width: min(100%, 94rem);
+  min-height: 4.2rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.site-header .brand {
+  display: inline-grid;
+  width: clamp(8.7rem, 10.4vw, 10.9rem);
+  min-width: 0;
+  min-height: 3rem;
+  height: 3rem;
+  align-content: center;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+:root[data-theme="day"] .site-header .brand {
+  background: transparent;
+  box-shadow: none;
+}
+
+.brand-logo-shell {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border: 0;
+  background: transparent;
+}
+
+.brand-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transform: scale(1.28);
+}
+
+.site-header .brand-subtitle {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.site-nav-links {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.12rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.site-nav-links::-webkit-scrollbar {
+  display: none;
+}
+
+.site-nav-links .nav-link {
+  display: inline-flex;
+  grid-template-columns: none;
+  flex: 0 0 auto;
+  min-width: auto;
+  min-height: 2.35rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.42rem;
+  border-radius: 999px;
+  color: color-mix(in oklch, var(--text) 78%, transparent);
+  font-family: var(--font-display);
+  font-size: clamp(0.5rem, 0.5vw, 0.58rem);
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.site-nav-links .nav-link svg {
+  display: none;
+}
+
+.site-nav-links .nav-link:hover,
+.site-nav-links .nav-link[aria-current="page"] {
+  border-color: color-mix(in oklch, var(--green) 44%, var(--nav-border));
+  background: color-mix(in oklch, var(--green) 12%, transparent);
+  color: var(--text);
+}
+
+.site-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+}
+
+.site-header .theme-toggle.compact {
+  padding: 0;
+}
+
+.site-header .theme-toggle > div {
+  background: color-mix(in oklch, var(--panel-deep) 54%, transparent);
+}
+
+.site-header .war-room-cta {
+  min-height: 2.35rem;
+  width: 2.35rem;
+  min-width: 2.35rem;
+  padding: 0;
+  border-color: color-mix(in oklch, var(--green) 56%, var(--nav-border));
+  background: color-mix(in oklch, var(--green) 18%, var(--panel-raised));
+  color: var(--text);
+  box-shadow: none;
+  font-family: var(--font-display);
+  font-size: 0.64rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.site-header .war-room-cta span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+@media (max-width: 1320px) {
+  .site-nav {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    padding-top: 0.6rem;
+  }
+
+  .site-nav-links {
+    grid-column: 1 / -1;
+    order: 3;
+    width: 100%;
+    padding-bottom: 0.7rem;
+  }
+
+  .site-header-actions {
+    grid-column: auto;
+    justify-content: flex-end;
+    padding-bottom: 0;
+  }
+}
+
+@media (max-width: 680px) {
+  .site-nav {
+    min-height: auto;
+    padding: 0.62rem 0.7rem 0.7rem;
+  }
+
+  .site-header .brand {
+    width: 8.6rem;
+    height: 2.55rem;
+  }
+
+  .site-nav-links {
+    grid-column: 1 / -1;
+    order: 3;
+    width: 100%;
+  }
+
+  .site-header-actions {
+    grid-column: auto;
+    padding-bottom: 0;
+  }
+
+  .site-header .war-room-cta {
+    display: none;
+  }
+}
+
 /* ===  Export views === */
 
 .export-mode {
+  position: relative;
+  isolation: isolate;
   min-height: 100vh;
-  background: var(--bg);
+  background: linear-gradient(180deg, oklch(100% 0 0 / 72%), var(--bg));
 }
 
 .export-top-bar {
@@ -1721,7 +2048,17 @@ td strong {
 }
 
 .export-doc-brand .brand-word {
+  color: var(--logo-text);
+  font-family: var(--font-display);
   font-size: 1.28rem;
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.export-doc-brand .brand-subtitle {
+  color: color-mix(in oklch, var(--logo-text) 62%, transparent);
 }
 
 .export-doc-eyebrow {
@@ -1738,10 +2075,11 @@ td strong {
 
 .export-doc-header h1 {
   margin: 0 0 0.32rem;
-  font-family: 'Barlow Semi Condensed', ui-sans-serif, sans-serif;
-  font-size: 1.48rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-family: var(--font-display);
+  font-size: 1.18rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: uppercase;
   color: var(--text);
 }
 
