@@ -1,5 +1,7 @@
 # KOPIS War Room
 
+Kopis - Josh's project.
+
 Local rebuild of the KOPIS founder command center from the Perplexity artifact handoff.
 
 ## Run
