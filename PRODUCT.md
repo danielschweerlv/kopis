@@ -2,7 +2,7 @@
 
 ## Product
 
-KOPIS War Room is a founder command center for validating, packaging, and operating Kopis: lender-agnostic payroll repayment infrastructure.
+KOPIS War Room is a founder command center for validating, packaging, and operating Kopis: a payroll linked repayment system.
 
 ## Register
 
@@ -17,7 +17,7 @@ product
 
 ## Positioning
 
-Kopis is a lender-neutral payroll repayment rail. Third-party lenders integrate once, then orchestrate borrower-consented repayment across payroll connectivity providers with compliance controls, servicing, reconciliation, exception handling, and job-change continuity.
+Kopis is a payroll linked repayment system. Third-party lenders integrate once, then orchestrate borrower-consented repayment across payroll connectivity providers with compliance controls, servicing, reconciliation, exception handling, and job-change continuity.
 
 ## Non-Claims
 

@@ -146,7 +146,7 @@ export const plainEnglishBriefs: Record<RouteId, WorkItem[]> = {
   "what-is-kopis": [
     {
       title: "What this means",
-      body: "Kopis is not the lender and not the payroll login tool. It is the layer that tells lenders how to set up, explain, track, and recover payroll-linked repayments.",
+      body: "Kopis is not the lender and not the payroll login tool. It is the layer that tells lenders how to set up, explain, track, and recover payroll linked repayments.",
     },
     {
       title: "Why it matters",
@@ -158,7 +158,7 @@ export const plainEnglishBriefs: Record<RouteId, WorkItem[]> = {
     },
     {
       title: "What we need to prove next",
-      body: "Show a lender-neutral workflow where one lender can create a repayment plan and keep the borrower informed at every step.",
+      body: "Show a payroll linked repayment workflow where one lender can create a repayment plan and keep the borrower informed at every step.",
     },
   ],
   "legal-path": [
@@ -168,7 +168,7 @@ export const plainEnglishBriefs: Record<RouteId, WorkItem[]> = {
     },
     {
       title: "Why it matters",
-      body: "Payroll-linked repayment touches wages, loan servicing, data access, revocation, and state rules. None of those can be waved away.",
+      body: "Payroll linked repayment touches wages, loan servicing, data access, revocation, and state rules. None of those can be waved away.",
     },
     {
       title: "What could go wrong",
@@ -200,7 +200,7 @@ export const plainEnglishBriefs: Record<RouteId, WorkItem[]> = {
   "build-pilot": [
     {
       title: "What this means",
-      body: "The pilot is not a demo. It is a controlled test to learn whether payroll-linked repayment improves a lender's real portfolio economics.",
+      body: "The pilot is not a demo. It is a controlled test to learn whether payroll linked repayment improves a lender's real portfolio economics.",
     },
     {
       title: "Why it matters",
@@ -393,7 +393,7 @@ export const competitorRows: MatrixRow[] = [
   {
     first: "Employer lenders",
     second: "Kashable, BMG / LoansAtWork, TrueConnect, Salary Finance, OneBlinc",
-    third: "Loan product, employer channel, and payroll-linked repayment inside their own lending motion.",
+    third: "Loan product, employer channel, and payroll linked repayment inside their own lending motion.",
     fourth: "Kopis is neutral infrastructure for many third-party lenders.",
   },
   {
@@ -405,13 +405,13 @@ export const competitorRows: MatrixRow[] = [
   {
     first: "Repayment rail comparator",
     second: "Highline",
-    third: "Payroll-linked bill payment and repayment-adjacent infrastructure.",
+    third: "Payroll linked bill payment and repayment-adjacent infrastructure.",
     fourth: "Kopis narrows around lender diligence, installment-loan compliance, and multi-provider orchestration.",
   },
   {
     first: "Consumer proof point",
     second: "Perpay",
-    third: "Consumer-facing payroll repayment behavior and trust model.",
+    third: "Consumer-facing payroll linked repayment behavior and trust model.",
     fourth: "Kopis turns the behavior into a B2B lender rail with borrower consent controls.",
   },
 ];
@@ -512,7 +512,7 @@ export const growthItems: WorkItem[] = [
   {
     title: "Primary ICP",
     body:
-      "Mid-market installment lenders with annual originations above $100M, measurable loss-rate pressure, and no internal payroll repayment rail.",
+      "Mid-market installment lenders with annual originations above $100M, measurable loss-rate pressure, and no internal payroll linked repayment system.",
   },
   {
     title: "Lead pitch",

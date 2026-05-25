@@ -93,7 +93,7 @@ export const claimsAnalysis: MatrixRow[] = [
   {
     first: "No company has built this",
     second: "Redirect",
-    third: "Lead with the gap: 'Nobody has productized the lender-neutral orchestration rail.' That's accurate and defensible.",
+    third: "Lead with the gap: 'Payroll linked repayment exists; Kopis makes it operable for third-party lenders.' That's accurate and defensible.",
   },
   {
     first: "Kashable is a 1:1 competitor",
@@ -116,7 +116,7 @@ export const claimsAnalysis: MatrixRow[] = [
     third: "Base the provisional patent strategy here from day one.",
   },
   {
-    first: "Payroll-linked repayment materially lowers default rates",
+    first: "Payroll linked repayment materially lowers default rates",
     second: "Qualify",
     third: "Treat third-party evidence as directional. The pilot must generate Kopis-specific proof.",
   },
@@ -148,7 +148,7 @@ export const claimsAnalysis: MatrixRow[] = [
   {
     first: "Commodity payroll API framing",
     second: "Retire",
-    third: "Own 'lender-agnostic payroll repayment infrastructure.' More accurate, more defensible, and harder to compare-shop.",
+    third: "Own 'payroll linked repayment system.' More accurate, more defensible, and harder to compare-shop.",
   },
 ];
 

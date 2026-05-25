@@ -17,7 +17,7 @@ export const topMarketPlayers: MarketPlayer[] = [
     whereTheyStop:
       "It is connectivity infrastructure. The lender still has to own repayment rules, borrower notices, exception servicing, reconciliation, and state-by-state repayment constraints.",
     kopisRead:
-      "Useful behind Kopis as a connectivity layer, but not a substitute for the lender-neutral repayment operating layer.",
+      "Useful behind Kopis as a connectivity layer, but not a substitute for the payroll linked repayment operating layer.",
   },
   {
     name: "Argyle",
@@ -35,7 +35,7 @@ export const topMarketPlayers: MarketPlayer[] = [
     doesWell:
       "Strong action layer around payroll accounts, direct-deposit updates, verification, and embedded payroll workflows for banks and fintechs.",
     whereTheyStop:
-      "The product surface is not a lender-neutral loan repayment rail with borrower-authorized installment scheduling, exception handling, and job-change recovery.",
+      "The product surface is not a payroll linked repayment system with borrower-authorized installment scheduling, exception handling, and job-change recovery.",
     kopisRead:
       "Atomic shows how payroll actions can be embedded; Kopis narrows that lesson to lender repayment orchestration.",
   },
@@ -55,7 +55,7 @@ export const topMarketPlayers: MarketPlayer[] = [
     doesWell:
       "Makes salary-linked employee finance understandable through the employer-benefits channel and keeps borrower language concrete.",
     whereTheyStop:
-      "Its strength is the employer benefit model; it does not solve a general, lender-agnostic repayment rail for multiple lenders and payroll providers.",
+      "Its strength is the employer benefit model; it does not solve a payroll linked repayment system for multiple lenders and payroll providers.",
     kopisRead:
       "Borrow the plain-English benefits framing while keeping Kopis positioned as infrastructure for lenders.",
   },
@@ -79,7 +79,7 @@ export const patentAngles: WorkItem[] = [
   },
   {
     title: "Payment allocation, exception handling, and fallback sequencing when payroll deductions fail or become unavailable.",
-    body: "Structured fallback and exception logic specific to payroll repayment scenarios.",
+    body: "Structured fallback and exception logic specific to payroll linked repayment scenarios.",
     meta: "Counsel-review candidate",
   },
   {

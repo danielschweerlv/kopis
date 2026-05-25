@@ -713,12 +713,12 @@ function AudioVisualizer({ compact = false }: { compact?: boolean }) {
 
   return (
     <DottedFrame
-      label="War Room audio briefing"
+      label="Kopis intro audio"
       className={`${compact ? "audio-frame compact" : "audio-frame"}${isPlaying ? " is-playing" : ""}`}
     >
       <div className="media-label">
         <AudioLines size={18} aria-hidden="true" />
-        <span>War Room Audio Briefing</span>
+        <span>Kopis Intro Audio</span>
       </div>
       <div className="waveform" aria-hidden="true">
         {bars.map((bar) => (
@@ -739,10 +739,10 @@ function AudioVisualizer({ compact = false }: { compact?: boolean }) {
           onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
           preload="metadata"
           ref={audioRef}
-          src="/media/kopis-war-room-brief.m4a"
+          src="/media/kopis-introaudio.wav"
         />
         <button
-          aria-label={isPlaying ? "Pause War Room audio briefing" : "Play War Room audio briefing"}
+          aria-label={isPlaying ? "Pause Kopis intro audio" : "Play Kopis intro audio"}
           className="audio-control-btn"
           onClick={togglePlayback}
           type="button"
@@ -751,7 +751,7 @@ function AudioVisualizer({ compact = false }: { compact?: boolean }) {
         </button>
         <div className="audio-progress-wrap">
           <input
-            aria-label="War Room audio progress"
+            aria-label="Kopis intro audio progress"
             className="audio-progress"
             max={duration || 0}
             min="0"
@@ -798,7 +798,7 @@ function CommandBriefPage({
             War Room
           </h1>
           <p>
-            Lender-neutral payroll repayment infrastructure. Third-party lenders integrate once, then orchestrate
+            Payroll linked repayment system. Third-party lenders integrate once, then orchestrate
             borrower-consented repayment across payroll systems with compliance, reconciliation, and job-change
             continuity.
           </p>
@@ -815,7 +815,7 @@ function WhatIsKopisPage() {
     <>
       <PageHeader
         eyebrow="What Kopis Is"
-        title="Lender-neutral payroll repayment infrastructure."
+        title="Payroll linked repayment system."
         body="Kopis is the orchestration layer for borrower-consented wage repayment, compliance controls, servicing workflows, reconciliation, and job-change continuity."
       />
       <WhatIsKopisFocus />

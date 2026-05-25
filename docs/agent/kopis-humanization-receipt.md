@@ -35,7 +35,7 @@ Added a new route at `/borrower-trust` with:
 - Failure modes to avoid
 - Counsel review package checklist
 
-Reason: the highest-risk failures in adjacent wage-advance and payroll-linked repayment markets cluster around unclear fees, consent, revocation, borrower expectations, and repayment mechanics. Kopis cannot only explain the lender workflow. The borrower has to understand the money movement before authorization.
+Reason: the highest-risk failures in adjacent wage-advance and payroll linked repayment markets cluster around unclear fees, consent, revocation, borrower expectations, and repayment mechanics. Kopis cannot only explain the lender workflow. The borrower has to understand the money movement before authorization.
 
 Validation:
 
