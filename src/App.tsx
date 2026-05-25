@@ -1,10 +1,7 @@
 import {
   AudioLines,
-  ArrowRight,
-  BriefcaseBusiness,
-  Building2,
   CalendarDays,
-  CircleDollarSign,
+  ChevronDown,
   Clock3,
   Download,
   FileText,
@@ -24,55 +21,48 @@ import {
   Target,
   TrendingUp,
   Video,
-  WalletCards,
   type LucideIcon,
 } from "lucide-react";
-import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import {
-  brandAssets,
+  borrowerTrustPrinciples,
+  borrowerTrustRows,
   competitorRows,
+  consentFlow,
   fundsFlowRows,
   growthItems,
   gtmPhases,
-  investorResources,
   legalQuestions,
-  marketSignals,
   mvpRows,
   nextSevenDays,
   nonClaims,
   ownerMap,
+  plainEnglishBriefs,
   pilotFacts,
   pilotTimeline,
-  productLayers,
   routes,
   whatIsKopis,
   type FactCard,
   type MatrixRow,
-  type ResourceItem,
   type RouteDefinition,
   type RouteId,
   type TimelineItem,
   type WorkItem,
 } from "./data/warRoomData";
 import {
-  competitorBestPractices,
-  exploitMap,
+  topMarketPlayers,
   legalSequencing,
   legalWorkstreams,
   patentAngles,
 } from "./data/legalMarketData";
 import {
-  brandThesis,
   buyerNeeds,
-  claimsAnalysis,
-  criticalPath,
-  operatingPlan,
-  seoArchitecture,
 } from "./data/gtmDiligenceData";
 
 type ThemeMode = "night" | "day";
 
 const DAY_UNICORN_PROJECT_ID = "qTiAlX0sxkuBOAiL7qHL";
+const DAY_UNICORN_IFRAME_URL = `https://unicorn.studio/embed/${DAY_UNICORN_PROJECT_ID}`;
 const UNICORN_SCRIPT_ID = "unicorn-studio-runtime";
 const UNICORN_SCRIPT_SRC =
   "https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.4.29/dist/unicornStudio.umd.js";
@@ -94,16 +84,24 @@ const iconByRoute: Record<RouteId, LucideIcon> = {
   "market-competitors": TrendingUp,
   "build-pilot": Gauge,
   "growth-system": Rocket,
+  "borrower-trust": ShieldCheck,
   "next-moves": ListChecks,
   "investor-kit": FolderOpen,
 };
 
-const routeByPath = new Map(routes.map((route) => [route.path, route]));
-
-type IpTimezoneResponse = {
-  timezone?: string;
-  utc_offset?: string;
+const topNavLabelByRoute: Record<RouteId, string> = {
+  "command-brief": "Kopis",
+  "what-is-kopis": "Product",
+  "legal-path": "Legal",
+  "borrower-trust": "Borrower",
+  "market-competitors": "Market",
+  "build-pilot": "Pilot",
+  "growth-system": "GTM",
+  "next-moves": "Plan",
+  "investor-kit": "Investor",
 };
+
+const routeByPath = new Map(routes.map((route) => [route.path, route]));
 
 type IpClock = {
   time: string;
@@ -186,6 +184,7 @@ function NavLink({
   onNavigate: (event: React.MouseEvent<HTMLAnchorElement>, path: string) => void;
 }) {
   const Icon = iconByRoute[route.id];
+  const navLabel = topNavLabelByRoute[route.id];
 
   return (
     <a
@@ -194,24 +193,107 @@ function NavLink({
       href={route.path}
       onClick={(event) => onNavigate(event, route.path)}
       aria-current={active ? "page" : undefined}
+      aria-label={navLabel}
     >
       <Icon size={16} aria-hidden="true" />
-      <span>{route.label}</span>
+      <span>{navLabel}</span>
     </a>
   );
 }
 
-function useUnicornStudio() {
+function RouteMenu({
+  activeRoute,
+  onNavigate,
+}: {
+  activeRoute: RouteDefinition;
+  onNavigate: (event: React.MouseEvent<HTMLAnchorElement>, path: string) => void;
+}) {
+  return (
+    <details className="route-menu">
+      <summary>
+        <span className="route-menu-logo-shell" aria-hidden="true">
+          <img className="route-menu-logo" src="/brand/kopis-logo-night.png" alt="" />
+        </span>
+        <span className="route-menu-current">
+          <span>Room</span>
+          <strong>{topNavLabelByRoute[activeRoute.id]}</strong>
+        </span>
+        <ChevronDown size={15} aria-hidden="true" />
+      </summary>
+      <div className="route-menu-panel" aria-label="War Room rooms">
+        {routes.map((route) => {
+          const Icon = iconByRoute[route.id];
+          const navLabel = topNavLabelByRoute[route.id];
+
+          return (
+            <a
+              aria-current={activeRoute.id === route.id ? "page" : undefined}
+              className="route-menu-link"
+              data-accent={route.accent}
+              href={route.path}
+              key={route.id}
+              onClick={(event) => {
+                onNavigate(event, route.path);
+                event.currentTarget.closest("details")?.removeAttribute("open");
+              }}
+            >
+              <Icon size={17} aria-hidden="true" />
+              <span>
+                <strong>{navLabel}</strong>
+                <small>{route.label}</small>
+              </span>
+            </a>
+          );
+        })}
+      </div>
+    </details>
+  );
+}
+
+function useUnicornStudio(active: boolean) {
+  const [useIframeFallback, setUseIframeFallback] = useState(false);
+
   useEffect(() => {
+    if (!active) {
+      setUseIframeFallback(false);
+      return;
+    }
+
     let cancelled = false;
+    let fallbackTimer = 0;
+    let observer: MutationObserver | null = null;
 
     const initialize = () => {
-      if (cancelled || !window.UnicornStudio?.init || window.UnicornStudio.isInitialized) {
+      const target = document.querySelector<HTMLElement>(`[data-us-project="${DAY_UNICORN_PROJECT_ID}"]`);
+      if (cancelled || !window.UnicornStudio?.init || !target || target.children.length > 0) {
         return;
       }
 
-      window.UnicornStudio.init();
-      window.UnicornStudio.isInitialized = true;
+      observer = new MutationObserver(() => {
+        if (target.children.length > 0) {
+          window.UnicornStudio!.isInitialized = true;
+          setUseIframeFallback(false);
+        }
+      });
+      observer.observe(target, { childList: true });
+
+      try {
+        window.UnicornStudio.isInitialized = false;
+        window.UnicornStudio.init();
+      } catch (error) {
+        window.UnicornStudio.isInitialized = false;
+        console.warn("KOPIS day background failed to initialize", error);
+        return;
+      }
+
+      fallbackTimer = window.setTimeout(() => {
+        if (!cancelled && target.children.length > 0) {
+          window.UnicornStudio!.isInitialized = true;
+          setUseIframeFallback(false);
+        } else if (!cancelled) {
+          setUseIframeFallback(true);
+        }
+      }, 2500);
     };
 
     const existingScript = document.getElementById(UNICORN_SCRIPT_ID) as HTMLScriptElement | null;
@@ -225,6 +307,8 @@ function useUnicornStudio() {
 
       return () => {
         cancelled = true;
+        window.clearTimeout(fallbackTimer);
+        observer?.disconnect();
         existingScript.removeEventListener("load", initialize);
       };
     }
@@ -240,17 +324,31 @@ function useUnicornStudio() {
 
     return () => {
       cancelled = true;
+      window.clearTimeout(fallbackTimer);
+      observer?.disconnect();
       script.removeEventListener("load", initialize);
     };
-  }, []);
+  }, [active]);
+
+  return useIframeFallback;
 }
 
 function AmbientField({ theme }: { theme: ThemeMode }) {
-  useUnicornStudio();
+  const useDayIframeFallback = useUnicornStudio(theme === "day");
 
   return (
     <div className="ambient-field" data-theme={theme} aria-hidden="true">
       <div className="ambient-layer ambient-layer-day" style={{ opacity: theme === "day" ? 1 : 0 }}>
+        {theme === "day" && useDayIframeFallback && (
+          <iframe
+            allow="autoplay; fullscreen"
+            className="unicorn-iframe-background"
+            frameBorder="0"
+            loading="eager"
+            src={DAY_UNICORN_IFRAME_URL}
+            title="KOPIS day ambient background"
+          />
+        )}
         <div className="unicorn-background" data-us-project={DAY_UNICORN_PROJECT_ID} />
       </div>
       <div className="ambient-layer ambient-layer-night" style={{ opacity: theme === "night" ? 1 : 0 }}>
@@ -264,7 +362,6 @@ function AmbientField({ theme }: { theme: ThemeMode }) {
           title="KOPIS night ambient background"
         />
       </div>
-      <div className="ambient-fallback" />
       <div className="ambient-scrim" />
     </div>
   );
@@ -317,16 +414,9 @@ function NavigationHeader({
             <NavLink active={activeRoute.id === route.id} key={route.id} onNavigate={onNavigate} route={route} />
           ))}
         </div>
+        <RouteMenu activeRoute={activeRoute} onNavigate={onNavigate} />
         <div className="site-header-actions">
           <ThemeToggle compact onThemeChange={onThemeChange} theme={theme} />
-          <a
-            className="war-room-cta"
-            href="/command-brief"
-            onClick={(event) => onNavigate(event, "/command-brief")}
-          >
-            <span>Command Brief</span>
-            <ArrowRight size={18} aria-hidden="true" />
-          </a>
         </div>
       </nav>
     </header>
@@ -351,52 +441,18 @@ function useIpClock() {
   }));
 
   useEffect(() => {
-    let cancelled = false;
-    let intervalId: number | undefined;
+    const updateClock = () => {
+      setClock({
+        time: formatClock(browserZone),
+        zone: browserZone,
+      });
+    };
 
-    function startClock(timeZone: string) {
-      const updateClock = () => {
-        setClock({
-          time: formatClock(timeZone),
-          zone: timeZone,
-        });
-      };
-
-      updateClock();
-      intervalId = window.setInterval(updateClock, 1000);
-    }
-
-    async function detectTimezone() {
-      try {
-        const response = await fetch("https://ipapi.co/json/");
-        if (!response.ok) {
-          throw new Error(`Timezone lookup failed: ${response.status}`);
-        }
-
-        const data = (await response.json()) as IpTimezoneResponse;
-        const detectedZone = data.timezone;
-
-        if (!detectedZone) {
-          throw new Error("Timezone lookup returned no timezone");
-        }
-
-        if (!cancelled) {
-          startClock(detectedZone);
-        }
-      } catch {
-        if (!cancelled) {
-          startClock(browserZone);
-        }
-      }
-    }
-
-    void detectTimezone();
+    updateClock();
+    const intervalId = window.setInterval(updateClock, 1000);
 
     return () => {
-      cancelled = true;
-      if (intervalId) {
-        window.clearInterval(intervalId);
-      }
+      window.clearInterval(intervalId);
     };
   }, [browserZone]);
 
@@ -501,12 +557,12 @@ function MatrixTable({
         <tbody>
           {rows.map((row) => (
             <tr key={row.first}>
-              <td>
+              <td data-label={headers[0]}>
                 <strong>{row.first}</strong>
               </td>
-              <td>{row.second}</td>
-              <td>{row.third}</td>
-              {headers[3] && <td>{row.fourth}</td>}
+              <td data-label={headers[1]}>{row.second}</td>
+              <td data-label={headers[2] || "Detail"}>{row.third}</td>
+              {headers[3] && <td data-label={headers[3]}>{row.fourth}</td>}
             </tr>
           ))}
         </tbody>
@@ -529,23 +585,43 @@ function Timeline({ items }: { items: TimelineItem[] }) {
   );
 }
 
-function ResourceList({ items }: { items: ResourceItem[] }) {
+function PlainEnglishBrief({ routeId }: { routeId: RouteId }) {
   return (
-    <div className="resource-list">
+    <Panel title="Here is the breakdown" className="plain-brief">
+      <WorkList items={plainEnglishBriefs[routeId]} />
+    </Panel>
+  );
+}
+
+function BriefCardStack({ items }: { items: WorkItem[] }) {
+  return (
+    <div className="brief-card-stack">
       {items.map((item) => (
-        <article key={item.title}>
-          <FileText size={16} aria-hidden="true" />
+        <article className="brief-card" key={item.title}>
           <div>
             <strong>{item.title}</strong>
-            <p>{item.detail}</p>
           </div>
-          <span>{item.kind}</span>
-          <button type="button" aria-label={`Download placeholder for ${item.title}`}>
-            <Download size={14} aria-hidden="true" />
-          </button>
+          <p>{item.body}</p>
         </article>
       ))}
     </div>
+  );
+}
+
+function WhatIsKopisFocus() {
+  const briefItems = plainEnglishBriefs["what-is-kopis"];
+
+  return (
+    <section className="kopis-focus" aria-labelledby="kopis-plain-read-title">
+      <div className="kopis-focus-head">
+        <h2 id="kopis-plain-read-title">Here is the breakdown</h2>
+      </div>
+      <div className="kopis-video-layout">
+        <BriefCardStack items={briefItems.slice(0, 2)} />
+        <VideoFrame compact />
+        <BriefCardStack items={briefItems.slice(2, 4)} />
+      </div>
+    </section>
   );
 }
 
@@ -558,11 +634,26 @@ function DottedFrame({ children, label, className = "" }: { children: ReactNode;
   );
 }
 
+function formatAudioTime(seconds: number) {
+  if (!Number.isFinite(seconds) || seconds <= 0) {
+    return "0:00";
+  }
+
+  const wholeSeconds = Math.floor(seconds);
+  const minutes = Math.floor(wholeSeconds / 60);
+  const remainingSeconds = String(wholeSeconds % 60).padStart(2, "0");
+  return `${minutes}:${remainingSeconds}`;
+}
+
 function AudioVisualizer({ compact = false }: { compact?: boolean }) {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
   const bars = useMemo(
     () => {
-      const barCount = compact ? 88 : 86;
-      const peakHeight = compact ? 118 : 122;
+      const barCount = compact ? 88 : 68;
+      const peakHeight = compact ? 118 : 72;
       const minHeight = compact ? 8 : 4;
 
       return Array.from({ length: barCount }, (_, index) => {
@@ -576,9 +667,55 @@ function AudioVisualizer({ compact = false }: { compact?: boolean }) {
     },
     [compact],
   );
+  const progress = duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0;
+
+  useEffect(() => {
+    if (!isPlaying) {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      const audio = audioRef.current;
+
+      if (audio) {
+        setCurrentTime(audio.currentTime);
+      }
+    }, 200);
+
+    return () => window.clearInterval(intervalId);
+  }, [isPlaying]);
+
+  const togglePlayback = () => {
+    const audio = audioRef.current;
+
+    if (!audio) {
+      return;
+    }
+
+    if (audio.paused) {
+      void audio.play();
+      return;
+    }
+
+    audio.pause();
+  };
+
+  const scrubAudio = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const nextTime = Number(event.currentTarget.value);
+    const audio = audioRef.current;
+
+    setCurrentTime(nextTime);
+
+    if (audio && Number.isFinite(nextTime)) {
+      audio.currentTime = nextTime;
+    }
+  };
 
   return (
-    <DottedFrame label="Audio briefing placeholder" className={compact ? "audio-frame compact" : "audio-frame"}>
+    <DottedFrame
+      label="War Room audio briefing"
+      className={`${compact ? "audio-frame compact" : "audio-frame"}${isPlaying ? " is-playing" : ""}`}
+    >
       <div className="media-label">
         <AudioLines size={18} aria-hidden="true" />
         <span>War Room Audio Briefing</span>
@@ -589,13 +726,45 @@ function AudioVisualizer({ compact = false }: { compact?: boolean }) {
         ))}
       </div>
       <div className="audio-footer">
-        <button type="button" aria-label="Audio placeholder is not active yet">
-          <Play size={16} aria-hidden="true" />
+        <audio
+          className="war-room-audio-source"
+          onEnded={(event) => {
+            event.currentTarget.currentTime = 0;
+            setIsPlaying(false);
+            setCurrentTime(0);
+          }}
+          onLoadedMetadata={(event) => setDuration(event.currentTarget.duration)}
+          onPause={() => setIsPlaying(false)}
+          onPlay={() => setIsPlaying(true)}
+          onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
+          preload="metadata"
+          ref={audioRef}
+          src="/media/kopis-war-room-brief.m4a"
+        />
+        <button
+          aria-label={isPlaying ? "Pause War Room audio briefing" : "Play War Room audio briefing"}
+          className="audio-control-btn"
+          onClick={togglePlayback}
+          type="button"
+        >
+          {isPlaying ? <Pause size={16} aria-hidden="true" /> : <Play size={16} aria-hidden="true" />}
         </button>
-        <div className="progress-track">
-          <span />
+        <div className="audio-progress-wrap">
+          <input
+            aria-label="War Room audio progress"
+            className="audio-progress"
+            max={duration || 0}
+            min="0"
+            onChange={scrubAudio}
+            step="0.1"
+            style={{ "--audio-progress": `${progress}%` } as CSSProperties}
+            type="range"
+            value={duration > 0 ? Math.min(currentTime, duration) : 0}
+          />
         </div>
-        <time>0:00</time>
+        <time className="audio-time">
+          {formatAudioTime(currentTime)} / {formatAudioTime(duration)}
+        </time>
       </div>
     </DottedFrame>
   );
@@ -610,56 +779,6 @@ function VideoFrame({ compact = false }: { compact?: boolean }) {
       </div>
       <video controls preload="metadata" src="/media/kopis-thesis-explainer.mp4" />
     </DottedFrame>
-  );
-}
-
-function RouteCardGrid({ onNavigate }: { onNavigate: (path: string) => void }) {
-  return (
-    <div className="route-grid" id="war-room-grid">
-      {routes.map((route) => {
-        const Icon = iconByRoute[route.id];
-
-        return (
-          <a
-            className="route-card"
-            data-accent={route.accent}
-            href={route.path}
-            key={route.id}
-            onClick={(event) => {
-              if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) {
-                return;
-              }
-
-              event.preventDefault();
-              onNavigate(route.path);
-            }}
-          >
-            <Icon size={43} strokeWidth={1.85} aria-hidden="true" />
-            <span>{route.number}</span>
-            <strong>{route.label}</strong>
-            <p>{route.summary}</p>
-            <ArrowRight size={20} strokeWidth={1.8} aria-hidden="true" />
-          </a>
-        );
-      })}
-    </div>
-  );
-}
-
-function BriefStatusChip({
-  label,
-  value,
-  variant = "neutral",
-}: {
-  label: string;
-  value: string;
-  variant?: "amber" | "blue" | "green" | "neutral";
-}) {
-  return (
-    <div className="brief-status-chip" data-variant={variant}>
-      <span>{label}</span>
-      <strong>{value}</strong>
-    </div>
   );
 }
 
@@ -683,15 +802,10 @@ function CommandBriefPage({
             borrower-consented repayment across payroll systems with compliance, reconciliation, and job-change
             continuity.
           </p>
-          <div className="brief-status-row">
-            <BriefStatusChip label="Stage" value="Pre-pilot" variant="amber" />
-            <BriefStatusChip label="Legal" value="Counsel gates open" variant="amber" />
-            <BriefStatusChip label="Pilot target" value="Mid-market installment" variant="blue" />
-          </div>
         </div>
         <AudioVisualizer />
       </section>
-      <RouteCardGrid onNavigate={onNavigate} />
+      <PlainEnglishBrief routeId="command-brief" />
     </section>
   );
 }
@@ -700,26 +814,19 @@ function WhatIsKopisPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Core Thesis"
+        eyebrow="What Kopis Is"
         title="Lender-neutral payroll repayment infrastructure."
         body="Kopis is the orchestration layer for borrower-consented wage repayment, compliance controls, servicing workflows, reconciliation, and job-change continuity."
       />
-      <div className="two-column media-layout">
-        <Panel title="Product definition" eyebrow="Core answer" icon={<Layers3 size={18} aria-hidden="true" />}>
-          <WorkList items={whatIsKopis} />
-        </Panel>
-        <VideoFrame />
-      </div>
-      <div className="two-column">
-        <Panel title="Product layers" eyebrow="Operating stack" icon={<Building2 size={18} aria-hidden="true" />}>
-          <MatrixTable rows={productLayers} headers={["Layer", "What it owns", "Why it matters"]} />
-        </Panel>
-        <Panel title="Non-claims" eyebrow="Positioning guardrails" icon={<ShieldCheck size={18} aria-hidden="true" />}>
-          <ul className="check-list">
-            {nonClaims.map((claim) => (
-              <li key={claim}>{claim}</li>
-            ))}
-          </ul>
+      <WhatIsKopisFocus />
+      <div className="product-definition-row">
+        <Panel
+          className="product-definition-panel"
+          title="Product definition"
+          eyebrow="Core answer"
+          icon={<Layers3 size={18} aria-hidden="true" />}
+        >
+          <WorkList items={whatIsKopis.slice(0, 2)} />
         </Panel>
       </div>
     </>
@@ -730,10 +837,11 @@ function LegalPathPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Legal Path"
+        eyebrow="Legal Review Plan"
         title="Legal is a product workstream."
         body="The rail should not make final legal claims until counsel narrows wage assignment, funds flow, servicing, middleware, revocation, and pilot-state scope."
       />
+      <PlainEnglishBrief routeId="legal-path" />
       <div className="two-column">
         <Panel title="Counsel queue" eyebrow="Questions to resolve" icon={<Scale size={18} aria-hidden="true" />}>
           <WorkList items={legalQuestions} />
@@ -742,25 +850,6 @@ function LegalPathPage() {
           <MatrixTable rows={fundsFlowRows} headers={["Actor", "Function", "Open point"]} />
         </Panel>
       </div>
-      <Panel title="Counsel package output" eyebrow="Documents to produce" icon={<ScrollText size={18} aria-hidden="true" />}>
-        <div className="document-grid">
-          <article>Five-state wage assignment and revocation memo</article>
-          <article>Money transmitter and control-of-funds analysis</article>
-          <article>Servicing role classification by pilot state</article>
-          <article>Middleware repayment terms review</article>
-          <article>Borrower authorization and revocation draft</article>
-          <article>IP claim screen for continuity and rules engine</article>
-        </div>
-      </Panel>
-      <Panel title="Patent strategy" eyebrow="Narrow and defensible">
-        <WorkList items={patentAngles} />
-      </Panel>
-      <Panel title="Legal workstreams" eyebrow="Eight tracks">
-        <WorkList items={legalWorkstreams} />
-      </Panel>
-      <Panel title="Legal sequencing" eyebrow="Eight steps">
-        <Timeline items={legalSequencing} />
-      </Panel>
     </>
   );
 }
@@ -769,47 +858,60 @@ function MarketCompetitorsPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Market + Competitors"
+        eyebrow="Market Map + Competitors"
         title="The wedge is orchestration, not payroll access alone."
         body="Kopis competes against lender internal builds, employer-linked lenders, payroll APIs used directly, and repayment-adjacent rails."
       />
+      <PlainEnglishBrief routeId="market-competitors" />
       <Panel title="Competitive map" eyebrow="Landscape" icon={<TrendingUp size={18} aria-hidden="true" />}>
         <MatrixTable rows={competitorRows} headers={["Category", "Examples", "What they own", "Kopis wedge"]} />
       </Panel>
-      <div className="three-column">
-        <Panel title="Buyer pain" icon={<WalletCards size={18} aria-hidden="true" />}>
-          <WorkList items={marketSignals} />
-        </Panel>
-        <Panel title="Proof story" icon={<CircleDollarSign size={18} aria-hidden="true" />}>
-          <ul className="metric-list">
-            <li>
-              <strong>Loss reduction</strong>
-              <span>Primary lender ROI claim, validated through pilot data.</span>
-            </li>
-            <li>
-              <strong>Servicing lift</strong>
-              <span>Reconciliation, exception, and consent trails should lower operational friction.</span>
-            </li>
-            <li>
-              <strong>Continuity</strong>
-              <span>Job-change workflow keeps repayment paths from breaking silently.</span>
-            </li>
-          </ul>
-        </Panel>
-        <Panel title="First vertical" icon={<BriefcaseBusiness size={18} aria-hidden="true" />}>
-          <p className="panel-copy">
-            Start with personal or medical installment lenders. Do not use mortgage as the initial beachhead because the
-            compliance and servicing surface is heavier before the repayment rail is proven.
-          </p>
-        </Panel>
-      </div>
-      <Panel title="What the best players do well" eyebrow="Steal these patterns">
-        <WorkList items={competitorBestPractices} />
-      </Panel>
-      <Panel title="Where competitors leave the door open" eyebrow="The exploit map">
-        <WorkList items={exploitMap} />
-      </Panel>
+      <MarketPlayerDocument />
     </>
+  );
+}
+
+function MarketPlayerDocument() {
+  return (
+    <section className="panel market-document" aria-labelledby="market-player-document-title">
+      <div className="panel-head">
+        <div>
+          <span className="eyebrow">Top five market players</span>
+          <h2 id="market-player-document-title">What they do well, and where Kopis is different</h2>
+        </div>
+        <div className="panel-icon">
+          <TrendingUp size={18} aria-hidden="true" />
+        </div>
+      </div>
+      <div className="market-document-intro">
+        <p>
+          The useful comparison is not who has payroll access. It is who owns lender repayment orchestration after
+          consent: rules, servicing, reconciliation, exceptions, notices, and job-change continuity.
+        </p>
+      </div>
+      <div className="market-player-list">
+        {topMarketPlayers.map((player) => (
+          <article className="market-player-row" key={player.name}>
+            <header>
+              <span>{player.category}</span>
+              <h3>{player.name}</h3>
+            </header>
+            <div>
+              <h4>What they do well</h4>
+              <p>{player.doesWell}</p>
+            </div>
+            <div>
+              <h4>Where they stop</h4>
+              <p>{player.whereTheyStop}</p>
+            </div>
+            <div>
+              <h4>Kopis read</h4>
+              <p>{player.kopisRead}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -817,10 +919,11 @@ function BuildPilotPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Build + Pilot"
+        eyebrow="MVP + Pilot Plan"
         title="Scope the smallest credible repayment rail."
         body="The MVP should prove consented repayment, reconciliation, exception handling, and manual job-change recovery without overbuilding direct payroll integrations."
       />
+      <PlainEnglishBrief routeId="build-pilot" />
       <FactGrid items={pilotFacts} />
       <div className="two-column">
         <Panel title="MVP scope" eyebrow="Build versus defer" icon={<Gauge size={18} aria-hidden="true" />}>
@@ -838,10 +941,11 @@ function GrowthSystemPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Growth System"
+        eyebrow="Lender GTM Plan"
         title="Sell loss reduction with lower operational lift."
         body="The primary buyer is the lender. Borrowers and employers matter, but they support the lender proof story rather than replacing it."
       />
+      <PlainEnglishBrief routeId="growth-system" />
       <div className="two-column">
         <Panel title="GTM operating logic" eyebrow="Lender-led" icon={<Rocket size={18} aria-hidden="true" />}>
           <WorkList items={growthItems} />
@@ -850,22 +954,29 @@ function GrowthSystemPage() {
           <Timeline items={gtmPhases} />
         </Panel>
       </div>
-      <Panel title="Copy-ready lender frame" eyebrow="Pitch spine" icon={<BriefcaseBusiness size={18} aria-hidden="true" />}>
-        <div className="quote-panel">
-          <p>
-            One integration gives your repayment team access to borrower-consented payroll repayment across providers,
-            with compliance controls, reconciliation, exceptions, and job-change continuity built into the operating layer.
-          </p>
-        </div>
-      </Panel>
-      <Panel title="What each buyer cares about" eyebrow="Persona matrix">
-        <MatrixTable rows={buyerNeeds} headers={["Buyer", "Primary concern", ""]} />
-      </Panel>
-      <Panel title="Brand thesis" eyebrow="Institutional, not consumer">
-        <WorkList items={brandThesis} />
-      </Panel>
-      <Panel title="SEO architecture" eyebrow="Site structure">
-        <MatrixTable rows={seoArchitecture} headers={["Route", "Intent", "Content"]} />
+    </>
+  );
+}
+
+function BorrowerTrustPage() {
+  return (
+    <>
+      <PageHeader
+        eyebrow="Borrower Trust + Consent"
+        title="The borrower must understand the repayment before they authorize it."
+        body="Kopis can be lender-facing infrastructure, but the borrower still needs a plain explanation of the deduction, data access, revocation path, paystub label, job-change flow, and support channel."
+      />
+      <PlainEnglishBrief routeId="borrower-trust" />
+      <div className="two-column">
+        <Panel title="Trust rules" eyebrow="Borrower-facing standard" icon={<ShieldCheck size={18} aria-hidden="true" />}>
+          <WorkList items={borrowerTrustPrinciples} />
+        </Panel>
+        <Panel title="Consent flow" eyebrow="Before authorization" icon={<ScrollText size={18} aria-hidden="true" />}>
+          <Timeline items={consentFlow} />
+        </Panel>
+      </div>
+      <Panel title="Questions the borrower will actually ask" eyebrow="Answer these before Reddit does">
+        <MatrixTable rows={borrowerTrustRows} headers={["Question", "Plain answer", "Proof needed"]} />
       </Panel>
     </>
   );
@@ -875,10 +986,11 @@ function NextMovesPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Next Moves"
+        eyebrow="Operating Plan"
         title="The next week should narrow risk, not expand scope."
         body="Prioritize legal boundaries, middleware permission, pilot definition, and the lender diligence packet before adding new product surface area."
       />
+      <PlainEnglishBrief routeId="next-moves" />
       <div className="two-column">
         <Panel title="Next seven days" icon={<Clock3 size={18} aria-hidden="true" />}>
           <Timeline items={nextSevenDays} />
@@ -887,101 +999,24 @@ function NextMovesPage() {
           <MatrixTable rows={ownerMap} headers={["Owner", "Workstream", "Decision right"]} />
         </Panel>
       </div>
-      <Panel title="Decision log" eyebrow="Locked choices" icon={<ShieldCheck size={18} aria-hidden="true" />}>
-        <div className="document-grid">
-          <article>No legacy confidence tags in the routed product surface.</article>
-          <article>Landing page centers the audio-briefing visualizer placeholder.</article>
-          <article>What is Kopis owns the explainer video.</article>
-          <article>MP3 audio waits until the War Room build is complete.</article>
-          <article>Third-party visual assets are references only.</article>
-          <article>Kopis stays lender infrastructure, not lender or payroll API.</article>
-        </div>
-      </Panel>
-      <Panel title="Claims analysis" eyebrow="What to keep, sharpen, retire">
-        <MatrixTable rows={claimsAnalysis} headers={["Claim", "Status", "Better framing"]} />
-      </Panel>
-      <Panel title="Critical path" eyebrow="Sequenced steps">
-        <WorkList items={criticalPath} />
-      </Panel>
-      <Panel title="Operating plan" eyebrow="7 · 30 · 90 days">
-        <Timeline items={operatingPlan} />
-      </Panel>
     </>
   );
 }
 
-function InvestorKitPage({
-  theme,
-  onThemeChange,
-}: {
-  theme: ThemeMode;
-  onThemeChange: (theme: ThemeMode) => void;
-}) {
+function InvestorKitPage() {
   return (
-    <>
-      <PageHeader
-        eyebrow="Investor Kit"
-        title="Package the thesis without overstating the proof."
-        body="The kit should make the operating thesis, pilot plan, legal queue, and lender wedge legible while keeping unresolved items counsel-dependent."
-      />
-      <div className="investor-grid">
-        <AudioVisualizer compact />
-        <VideoFrame compact />
-        <Panel title="Resources" eyebrow="Placeholder packet" icon={<FolderOpen size={18} aria-hidden="true" />}>
-          <ResourceList items={investorResources} />
-        </Panel>
-        <Panel title="Brand assets" eyebrow="Local system" icon={<FileText size={18} aria-hidden="true" />}>
-          <ResourceList items={brandAssets} />
-        </Panel>
-        <Panel title="Ambient color animation" eyebrow="Original rebuild" icon={<Pause size={18} aria-hidden="true" />}>
-          <div className="ambient-preview">
-            <ThemeToggle onThemeChange={onThemeChange} theme={theme} />
-            <div className="mini-wave" aria-hidden="true" />
-          </div>
-        </Panel>
-      </div>
-      <Panel title="Export packets" eyebrow="Print-ready views" icon={<Download size={18} aria-hidden="true" />}>
-        <div className="export-link-grid">
-          <a className="export-link" href="/export/counsel">
-            <Scale size={18} aria-hidden="true" />
-            <div>
-              <strong>Counsel Packet</strong>
-              <p>Legal queue, funds flow, workstreams, sequencing, and patent strategy.</p>
-            </div>
-            <ArrowRight size={16} aria-hidden="true" />
-          </a>
-          <a className="export-link" href="/export/lender">
-            <Gauge size={18} aria-hidden="true" />
-            <div>
-              <strong>Lender Pilot Brief</strong>
-              <p>Product overview, pilot scope, MVP, timeline, and buyer matrix.</p>
-            </div>
-            <ArrowRight size={16} aria-hidden="true" />
-          </a>
-          <a className="export-link" href="/export/investor">
-            <FolderOpen size={18} aria-hidden="true" />
-            <div>
-              <strong>Investor Brief</strong>
-              <p>Operating thesis, competitive map, GTM logic, critical path, operating plan.</p>
-            </div>
-            <ArrowRight size={16} aria-hidden="true" />
-          </a>
-        </div>
-      </Panel>
-    </>
+    <section className="investor-document-route" aria-label="KOPIS investor document">
+      <iframe className="investor-document" src="/docs/KOPIS.pdf" title="KOPIS investor document" />
+    </section>
   );
 }
 
 function RouteContent({
   route,
   onNavigate,
-  theme,
-  onThemeChange,
 }: {
   route: RouteDefinition;
   onNavigate: (path: string) => void;
-  theme: ThemeMode;
-  onThemeChange: (theme: ThemeMode) => void;
 }) {
   switch (route.id) {
     case "what-is-kopis":
@@ -994,10 +1029,12 @@ function RouteContent({
       return <BuildPilotPage />;
     case "growth-system":
       return <GrowthSystemPage />;
+    case "borrower-trust":
+      return <BorrowerTrustPage />;
     case "next-moves":
       return <NextMovesPage />;
     case "investor-kit":
-      return <InvestorKitPage onThemeChange={onThemeChange} theme={theme} />;
+      return <InvestorKitPage />;
     case "command-brief":
     default:
       return <CommandBriefPage onNavigate={onNavigate} />;
@@ -1040,7 +1077,7 @@ function CounselPacketView() {
     <>
       <ExportDocumentHeader
         icon={Scale}
-        title="KOPIS Counsel Packet"
+        title="KOPIS Counsel Review Packet"
         subtitle="Legal workstreams, counsel queue, funds-flow analysis, and sequencing. All items provisional until counsel review."
       />
       <div className="two-column">
@@ -1066,6 +1103,9 @@ function CounselPacketView() {
       </Panel>
       <Panel title="Legal sequencing" eyebrow="Eight steps">
         <Timeline items={legalSequencing} />
+      </Panel>
+      <Panel title="Borrower consent review" eyebrow="Trust package">
+        <Timeline items={consentFlow} />
       </Panel>
       <Panel title="Patent strategy" eyebrow="Narrow and defensible">
         <WorkList items={patentAngles} />
@@ -1107,43 +1147,15 @@ function LenderPilotView() {
       <Panel title="GTM phases" eyebrow="Commercial path">
         <Timeline items={gtmPhases} />
       </Panel>
+      <Panel title="Borrower trust package" eyebrow="Consent and paystub clarity">
+        <WorkList items={borrowerTrustPrinciples} />
+      </Panel>
     </>
   );
 }
 
 function InvestorBriefView() {
-  return (
-    <>
-      <ExportDocumentHeader
-        icon={FolderOpen}
-        title="KOPIS Investor Brief"
-        subtitle="Operating thesis, market wedge, competitive position, and execution path. Pilot proof pending."
-      />
-      <Panel title="What Kopis is" eyebrow="Product thesis">
-        <WorkList items={whatIsKopis} />
-      </Panel>
-      <Panel title="Product layers" eyebrow="Operating stack">
-        <MatrixTable rows={productLayers} headers={["Layer", "What it owns", "Why it matters"]} />
-      </Panel>
-      <Panel title="Competitive map" eyebrow="Landscape">
-        <MatrixTable rows={competitorRows} headers={["Category", "Examples", "What they own", "Kopis wedge"]} />
-      </Panel>
-      <div className="two-column">
-        <Panel title="GTM operating logic" eyebrow="Lender-led">
-          <WorkList items={growthItems} />
-        </Panel>
-        <Panel title="GTM phases" eyebrow="Commercial path">
-          <Timeline items={gtmPhases} />
-        </Panel>
-      </div>
-      <Panel title="Critical path" eyebrow="Sequenced steps">
-        <WorkList items={criticalPath} />
-      </Panel>
-      <Panel title="Operating plan" eyebrow="7 · 30 · 90 days">
-        <Timeline items={operatingPlan} />
-      </Panel>
-    </>
-  );
+  return <InvestorKitPage />;
 }
 
 function App() {
@@ -1211,10 +1223,10 @@ function App() {
         theme={theme}
       />
       <section className="content-shell">
-        {activeRoute.id !== "command-brief" && (
+        {activeRoute.id !== "command-brief" && activeRoute.id !== "investor-kit" && (
           <TopBar activeRoute={activeRoute} />
         )}
-        <RouteContent route={activeRoute} onNavigate={navigate} onThemeChange={setTheme} theme={theme} />
+        <RouteContent route={activeRoute} onNavigate={navigate} />
       </section>
     </main>
   );
