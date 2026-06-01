@@ -127,6 +127,16 @@ p {
   color: var(--muted);
 }
 
+h1 {
+  font-family: var(--font-display);
+  letter-spacing: 0;
+}
+
+strong {
+  font-family: var(--font-display);
+  letter-spacing: 0;
+}
+
 .app-shell {
   position: relative;
   isolation: isolate;
@@ -660,7 +670,7 @@ p {
   font-size: clamp(3.2rem, 4.4vw, 4.75rem);
   font-weight: 700;
   line-height: 0.96;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
 }
 
 .landing-shell .landing-copy .hero-title {
@@ -1515,7 +1525,7 @@ td strong {
   color: var(--text);
   font-size: 0.82rem;
   font-weight: 760;
-  letter-spacing: -0.005em;
+  letter-spacing: 0;
   line-height: 1.1;
 }
 
@@ -1591,6 +1601,7 @@ td strong {
   display: grid;
   min-width: 0;
   gap: 0.14rem;
+  font-family: var(--font-display);
 }
 
 .wave-track-meta span {
@@ -2396,13 +2407,27 @@ td strong {
 
 .site-wordmark {
   display: inline-flex;
-  min-width: max-content;
+  width: 4.85rem;
+  height: 1.3rem;
+  min-width: 4.85rem;
   align-items: center;
-  color: var(--text);
-  font-size: 0.94rem;
-  font-weight: 780;
-  letter-spacing: 0.04em;
-  line-height: 1;
+  justify-content: flex-start;
+}
+
+.site-wordmark-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.site-wordmark-frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transform: scale(1.48);
 }
 
 .site-nav-links {
@@ -2654,7 +2679,7 @@ td strong {
   color: var(--text);
   font-size: clamp(1.85rem, 3vw, 3.1rem);
   font-weight: 810;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
   line-height: 0.98;
 }
 
@@ -2677,21 +2702,33 @@ td strong {
   gap: 0.18rem;
   margin: 0.55rem 0 0.8rem;
   color: var(--text);
-  font-family: var(--font-body);
+  font-family: var(--font-display);
   letter-spacing: 0;
   line-height: 0.96;
 }
 
-.command-hero-copy h1 span {
-  font-size: clamp(2.5rem, 5vw, 5rem);
-  font-weight: 840;
-  letter-spacing: 0.02em;
+.command-hero-wordmark {
+  display: block;
+  width: min(100%, clamp(14rem, 25vw, 23rem));
+  height: clamp(3.45rem, 6.2vw, 5.55rem);
+  overflow: hidden;
+}
+
+.command-hero-wordmark img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transform: scale(1.48);
 }
 
 .command-hero-copy h1 strong {
   color: color-mix(in oklch, var(--text) 82%, transparent);
+  font-family: var(--font-display);
   font-size: clamp(1.35rem, 2.25vw, 2.35rem);
   font-weight: 520;
+  letter-spacing: 0;
 }
 
 .command-hero-copy p {

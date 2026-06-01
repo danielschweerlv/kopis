@@ -662,6 +662,8 @@ function NavigationHeader({
   onThemeChange: (theme: ThemeMode) => void;
   onNavigate: (event: React.MouseEvent<HTMLAnchorElement>, path: string) => void;
 }) {
+  const headerLogoSrc = theme === "day" ? "/brand/kopis-logo-day.png" : "/brand/kopis-logo-night.png";
+
   return (
     <header className="site-header" aria-label="KOPIS navigation">
       <nav className="site-nav" aria-label="KOPIS War Room rooms">
@@ -670,7 +672,9 @@ function NavigationHeader({
           href="/command-brief"
           onClick={(event) => onNavigate(event, "/command-brief")}
         >
-          KOPIS
+          <span className="site-wordmark-frame">
+            <img src={headerLogoSrc} alt="KOPIS" />
+          </span>
         </a>
         <ul className="site-nav-links" aria-label="War Room routes">
           {routes.map((route) => (
@@ -1157,16 +1161,22 @@ function RoomBriefing({
 
 function CommandBriefPage({
   onNavigate,
+  theme,
 }: {
   onNavigate: (path: string) => void;
+  theme: ThemeMode;
 }) {
+  const heroLogoSrc = theme === "day" ? "/brand/kopis-logo-day.png" : "/brand/kopis-logo-night.png";
+
   return (
     <section className="command-dashboard">
       <section className="command-hero">
         <div className="command-hero-copy">
           <span className="eyebrow">Founder Command Center</span>
           <h1>
-            <span>KOPIS</span>
+            <span className="command-hero-wordmark">
+              <img src={heroLogoSrc} alt="KOPIS" />
+            </span>
             <strong>War Room</strong>
           </h1>
           <p>
@@ -1553,7 +1563,7 @@ function RouteContent({
       return <InvestorKitPage />;
     case "command-brief":
     default:
-      return <CommandBriefPage onNavigate={onNavigate} />;
+      return <CommandBriefPage onNavigate={onNavigate} theme={theme} />;
   }
 }
 
