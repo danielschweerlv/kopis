@@ -73,6 +73,8 @@ import {
   counselGates,
   differenceRows,
   differenceWedge,
+  highlineHeadToHead,
+  middlewareRisk,
   repaymentFlow,
   systemLayers,
   techBoundaries,
@@ -136,25 +138,25 @@ const commandBriefSignals = [
 
 const commandStatusCards: OperatingStatusCard[] = [
   {
-    label: "Current stage",
+    label: "What the lender gets",
+    value: "Fewer missed payments, less servicing",
+    evidence: "Likely",
+    tone: "likely",
+    body: "When repayment moves upstream of the checking account, a lender sees fewer avoidable delinquencies and lighter collection work.",
+  },
+  {
+    label: "The wedge",
+    value: "One integration, many payroll systems",
+    evidence: "Likely",
+    tone: "likely",
+    body: "A lender connects to Kopis once instead of rebuilding consent, rules, and reconciliation against every payroll provider.",
+  },
+  {
+    label: "Where it stands",
     value: "Pre-pilot diligence",
     evidence: "Verified",
     tone: "verified",
-    body: "Package the lender proof story while legal, middleware, consent, and reconciliation remain actively open.",
-  },
-  {
-    label: "Biggest risk",
-    value: "Counsel perimeter",
-    evidence: "Needs counsel",
-    tone: "needs-counsel",
-    body: "Voluntary wage assignment, servicer role, money transmission, and pilot-state scope still need review.",
-  },
-  {
-    label: "Pilot target",
-    value: "Personal or medical installment lender",
-    evidence: "Assumption",
-    tone: "assumption",
-    body: "The cleanest first wedge is a lender with measurable loss pressure and no in-house payroll rail.",
+    body: "Legal, middleware, consent, and reconciliation are still open. Wage assignment, servicer role, and funds flow stay counsel-dependent.",
   },
   {
     label: "Next proof",
@@ -782,12 +784,25 @@ function ExportPacketLinks() {
   );
 }
 
+const statusToneMap: Record<string, EvidenceTone> = {
+  "in progress": "likely",
+  next: "next",
+  "needs counsel": "needs-counsel",
+  draft: "assumption",
+};
+
+function statusTone(value: string): EvidenceTone {
+  return statusToneMap[value.trim().toLowerCase()] ?? "assumption";
+}
+
 function MatrixTable({
   rows,
   headers,
+  statusColumn = false,
 }: {
   rows: MatrixRow[];
   headers: [string, string, string, string?];
+  statusColumn?: boolean;
 }) {
   return (
     <div className="table-wrap">
@@ -805,7 +820,17 @@ function MatrixTable({
               </td>
               <td data-label={headers[1]}>{row.second}</td>
               <td data-label={headers[2] || "Detail"}>{row.third}</td>
-              {headers[3] && <td data-label={headers[3]}>{row.fourth}</td>}
+              {headers[3] && (
+                <td data-label={headers[3]}>
+                  {statusColumn && row.fourth ? (
+                    <span className="status-chip" data-tone={statusTone(row.fourth)}>
+                      {row.fourth}
+                    </span>
+                  ) : (
+                    row.fourth
+                  )}
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
@@ -1178,6 +1203,9 @@ function CompetitorsPage() {
         <MatrixTable rows={competitorRows} headers={["Category", "Examples", "What they own", "Kopis wedge"]} />
       </Panel>
       <MarketPlayerDocument />
+      <Panel title="Highline vs. Kopis" eyebrow="Closest comparator, side by side" icon={<TrendingUp size={18} aria-hidden="true" />}>
+        <MatrixTable rows={highlineHeadToHead} headers={["Dimension", "Highline", "Kopis"]} />
+      </Panel>
       <Panel title="Watchlist" eyebrow="Track, but secondary">
         <WorkList items={watchlistPlayers} />
       </Panel>
@@ -1298,6 +1326,9 @@ function TechnologyPage() {
           ))}
         </ul>
       </Panel>
+      <Panel title="Key dependency risk" eyebrow="Name it, do not bury it" icon={<ShieldCheck size={18} aria-hidden="true" />}>
+        <WorkList items={middlewareRisk} />
+      </Panel>
     </>
   );
 }
@@ -1312,7 +1343,7 @@ function Next30Page() {
         body="The next month is about removing unknowns, not adding features. Narrow the legal boundaries, confirm middleware permission, define the pilot, and package the lender diligence story."
       />
       <Panel title="Workstreams" eyebrow="The operating plan" icon={<ListChecks size={18} aria-hidden="true" />}>
-        <MatrixTable rows={workstreamRows} headers={["Workstream", "Owner", "Next task", "Status"]} />
+        <MatrixTable rows={workstreamRows} headers={["Workstream", "Owner", "Next task", "Status"]} statusColumn />
       </Panel>
       <div className="two-column">
         <Panel title="Next seven days" eyebrow="Immediate" icon={<Clock3 size={18} aria-hidden="true" />}>
@@ -1324,7 +1355,7 @@ function Next30Page() {
       </div>
       <div className="two-column">
         <Panel title="Counsel gates" eyebrow="Keep these visible" icon={<Scale size={18} aria-hidden="true" />}>
-          <ul className="check-list">
+          <ul className="check-list gate-list">
             {counselGates.map((gate) => (
               <li key={gate}>{gate}</li>
             ))}

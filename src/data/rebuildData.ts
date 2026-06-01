@@ -240,6 +240,50 @@ export const workstreamRows: MatrixRow[] = [
   },
 ];
 
+// Tab 3 — Highline head-to-head.
+// The closest comparator, side by side. Keep the funds-flow line counsel-safe.
+export const highlineHeadToHead: MatrixRow[] = [
+  {
+    first: "Core role",
+    second: "The pay-by-paycheck repayment rail itself.",
+    third: "The operating layer above the rail: consent, rules, servicing, reconciliation, and continuity.",
+  },
+  {
+    first: "Lender coverage",
+    second: "Its own repayment network.",
+    third: "Neutral layer meant to serve many third-party lenders from one integration.",
+  },
+  {
+    first: "Compliance",
+    second: "Runs its own rail's flow.",
+    third: "State-by-state rules engine, authorization, and revocation as a shared service (counsel-dependent).",
+  },
+  {
+    first: "Job change",
+    second: "Tied to its own repayment setup.",
+    third: "Detects job changes, pauses, and helps re-link the repayment path (manual in v1).",
+  },
+  {
+    first: "Funds movement",
+    second: "Describes capturing funds before direct deposit.",
+    third: "Coordinates authorized repayment; Kopis's own funds-flow role stays counsel-dependent.",
+  },
+];
+
+// Tab 5 — the dependency risk, named explicitly (not buried in a checklist).
+export const middlewareRisk: WorkItem[] = [
+  {
+    title: "The rail leans on payroll middleware",
+    body: "Kopis sits on top of payroll connectivity providers (Pinwheel, Argyle, Atomic, Truv). If a provider's terms forbid third-party-lender repayment, reprices access, or vertically integrates into lender repayment itself, the rail underneath Kopis is exposed.",
+    meta: "Key dependency",
+  },
+  {
+    title: "How Kopis limits the exposure",
+    body: "Confirm third-party-lender repayment is permitted in writing before the pilot, keep more than one provider in scope so no single one is a chokepoint, and plan a path toward direct payroll integrations over time. All middleware-terms review stays counsel-dependent.",
+    meta: "Mitigation",
+  },
+];
+
 // Tab 6 — counsel gates to keep visible.
 export const counselGates: string[] = [
   "Voluntary wage assignment",
