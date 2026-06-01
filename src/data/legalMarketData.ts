@@ -6,58 +6,64 @@ export type MarketPlayer = {
   doesWell: string;
   whereTheyStop: string;
   kopisRead: string;
+  source?: { label: string; href: string };
 };
 
 export const topMarketPlayers: MarketPlayer[] = [
   {
+    name: "Highline",
+    category: "Pay-by-paycheck repayment network",
+    doesWell:
+      "The closest direct comparator. Highline markets Pay by Paycheck for lenders and describes capturing funds before direct deposit by splitting the payment when payroll runs.",
+    whereTheyStop:
+      "It is the repayment rail itself. The broader lender workflow — consent records, compliance, servicing, reconciliation, and job-change recovery — still has to live somewhere.",
+    kopisRead:
+      "Treat as the closest repayment-rail comparator. Kopis competes on the operating layer above the rail, not the rail itself — and Kopis's own funds-flow role stays counsel-dependent.",
+    source: { label: "highline.co", href: "https://highline.co/" },
+  },
+  {
+    name: "Truv",
+    category: "Paycheck-linked lending and payroll data",
+    doesWell:
+      "Runs a Paycheck Linked Lending product that directs loan payments from paychecks and supports lender use cases on top of payroll data.",
+    whereTheyStop:
+      "It is payroll and paycheck-linked infrastructure. It does not become the neutral, multi-lender brain for consent, compliance, and continuity.",
+    kopisRead:
+      "A payroll-linked infrastructure competitor or potential rail. Kopis should own the lender operating layer above it.",
+    source: { label: "docs.truv.com", href: "https://docs.truv.com/docs/paycheck-linked-loans" },
+  },
+  {
     name: "Pinwheel",
-    category: "Payroll connectivity API",
+    category: "Payroll connectivity and pay-by-paycheck infrastructure",
     doesWell:
-      "Makes payroll data, income and employment verification, direct-deposit switching, and paycheck-linked actions legible to lenders and financial apps.",
+      "Markets Pay by Paycheck for lenders, with payments flowing automatically from each paycheck on top of strong payroll connectivity.",
     whereTheyStop:
-      "It is connectivity infrastructure. The lender still has to own repayment rules, borrower notices, exception servicing, reconciliation, and state-by-state repayment constraints.",
+      "It is connectivity and payment infrastructure. The lender still owns repayment rules, borrower notices, exception servicing, and reconciliation.",
     kopisRead:
-      "Useful behind Kopis as a connectivity layer, but not a substitute for the payroll linked repayment operating layer.",
-  },
-  {
-    name: "Argyle",
-    category: "Consumer-permissioned payroll data",
-    doesWell:
-      "Broad payroll account connectivity, income and employment data, paystubs, reports, and verification workflows that can plug into lending operations.",
-    whereTheyStop:
-      "It moves authorized payroll data well, but it does not become the compliance, servicing, revocation, and continuity brain for a third-party lender repayment program.",
-    kopisRead:
-      "Kopis should use this class of connectivity while owning the repayment-specific workflow above it.",
-  },
-  {
-    name: "Atomic",
-    category: "Embedded payroll actions",
-    doesWell:
-      "Strong action layer around payroll accounts, direct-deposit updates, verification, and embedded payroll workflows for banks and fintechs.",
-    whereTheyStop:
-      "The product surface is not a payroll linked repayment system with borrower-authorized installment scheduling, exception handling, and job-change recovery.",
-    kopisRead:
-      "Atomic shows how payroll actions can be embedded; Kopis narrows that lesson to lender repayment orchestration.",
+      "Useful behind Kopis as a connectivity and payment layer. Kopis abstracts over this kind of provider.",
+    source: { label: "pinwheelapi.com", href: "https://www.pinwheelapi.com/pay-by-paycheck" },
   },
   {
     name: "Kashable",
     category: "Employer-sponsored employee lending",
     doesWell:
-      "Clear employee-loan product, employer channel trust, benefit-style framing, and simple borrower-facing offer language.",
+      "A clear employee-loan program integrated with employer HRIS and payroll, repaid through payroll, with simple borrower-facing language.",
     whereTheyStop:
-      "It is a lending program, not neutral infrastructure that lets many third-party lenders orchestrate repayment across payroll systems.",
+      "It is a lending program reached through the employer, not neutral infrastructure for many third-party lenders.",
     kopisRead:
-      "Borrow the clarity and trust framing; do not copy the lender-owned category position.",
+      "Proof that payroll-repaid lending works. Borrow the clarity; Kopis stays neutral third-party infrastructure.",
+    source: { label: "kashable.com", href: "https://kashable.com/loans.html" },
   },
   {
-    name: "Salary Finance",
-    category: "Employer financial benefit platform",
+    name: "BMG / LoansAtWork",
+    category: "Employee loans via payroll deduction",
     doesWell:
-      "Makes salary-linked employee finance understandable through the employer-benefits channel and keeps borrower language concrete.",
+      "Offers employee loans repaid from a paycheck, payroll deduction, or bank account through the employer channel.",
     whereTheyStop:
-      "Its strength is the employer benefit model; it does not solve a payroll linked repayment system for multiple lenders and payroll providers.",
+      "Another employer-channel lending program — a market proof point, not the same category as Kopis.",
     kopisRead:
-      "Borrow the plain-English benefits framing while keeping Kopis positioned as infrastructure for lenders.",
+      "Treat as evidence the market exists, not as a direct comparator to Kopis's operating layer.",
+    source: { label: "bmgmoney.com", href: "https://www.bmgmoney.com/loansatwork/" },
   },
 ];
 
