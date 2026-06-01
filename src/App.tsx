@@ -41,10 +41,15 @@ import {
   plainEnglishBriefs,
   pilotFacts,
   pilotTimeline,
+  investorResources,
+  brandAssets,
   routes,
+  productLayers,
+  marketSignals,
   whatIsKopis,
   type FactCard,
   type MatrixRow,
+  type ResourceItem,
   type RouteDefinition,
   type RouteId,
   type TimelineItem,
@@ -57,26 +62,23 @@ import {
   patentAngles,
 } from "./data/legalMarketData";
 import {
-  buyerNeeds,
+  brandThesis,
+  claimsAnalysis,
+  criticalPath,
+  operatingPlan,
+  seoArchitecture,
 } from "./data/gtmDiligenceData";
 
 type ThemeMode = "night" | "day";
+type EvidenceTone = "verified" | "likely" | "needs-counsel" | "assumption" | "next";
 
-const DAY_UNICORN_PROJECT_ID = "qTiAlX0sxkuBOAiL7qHL";
-const DAY_UNICORN_IFRAME_URL = `https://unicorn.studio/embed/${DAY_UNICORN_PROJECT_ID}`;
-const UNICORN_SCRIPT_ID = "unicorn-studio-runtime";
-const UNICORN_SCRIPT_SRC =
-  "https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.4.29/dist/unicornStudio.umd.js";
-const NIGHT_SPLINE_URL = "https://my.spline.design/liquidgradientabstractbackground-gEjylYLumN1b1CUcuIb8DyUA";
-
-declare global {
-  interface Window {
-    UnicornStudio?: {
-      init?: () => void;
-      isInitialized?: boolean;
-    };
-  }
-}
+type OperatingStatusCard = {
+  label: string;
+  value: string;
+  evidence: string;
+  tone: EvidenceTone;
+  body: string;
+};
 
 const iconByRoute: Record<RouteId, LucideIcon> = {
   "command-brief": Target,
@@ -127,6 +129,382 @@ const commandBriefSignals = [
   },
 ];
 
+const commandStatusCards: OperatingStatusCard[] = [
+  {
+    label: "Current stage",
+    value: "Pre-pilot diligence",
+    evidence: "Verified",
+    tone: "verified",
+    body: "Package the lender proof story while legal, middleware, consent, and reconciliation remain actively open.",
+  },
+  {
+    label: "Biggest risk",
+    value: "Counsel perimeter",
+    evidence: "Needs counsel",
+    tone: "needs-counsel",
+    body: "Voluntary wage assignment, servicer role, money transmission, and pilot-state scope still need review.",
+  },
+  {
+    label: "Pilot target",
+    value: "Personal or medical installment lender",
+    evidence: "Assumption",
+    tone: "assumption",
+    body: "The cleanest first wedge is a lender with measurable loss pressure and no in-house payroll rail.",
+  },
+  {
+    label: "Next proof",
+    value: "One consented repayment flow",
+    evidence: "Next",
+    tone: "next",
+    body: "Show a borrower-authorized plan from consent through schedule, exception, reconciliation, and job-change handling.",
+  },
+];
+
+const roomStatusCards: Record<
+  Exclude<RouteId, "command-brief" | "investor-kit">,
+  OperatingStatusCard[]
+> = {
+  "what-is-kopis": [
+    {
+      label: "Role",
+      value: "Neutral orchestration layer",
+      evidence: "Verified",
+      tone: "verified",
+      body: "Kopis coordinates consent, rules, servicing, reconciliation, exceptions, and continuity for lenders.",
+    },
+    {
+      label: "Boundary",
+      value: "Not lender, not payroll API",
+      evidence: "Verified",
+      tone: "verified",
+      body: "The product should not be framed as origination, payroll connectivity, or broad payroll deduction invention.",
+    },
+    {
+      label: "Buyer",
+      value: "Third-party lenders",
+      evidence: "Likely",
+      tone: "likely",
+      body: "The first user is a lender team that needs lower loss risk and lower operational lift.",
+    },
+    {
+      label: "Next proof",
+      value: "One full repayment workflow",
+      evidence: "Next",
+      tone: "next",
+      body: "Show plan creation, borrower authorization, schedule, reconciliation, exception, and job-change handling.",
+    },
+  ],
+  "legal-path": [
+    {
+      label: "Primary gate",
+      value: "Voluntary wage assignment",
+      evidence: "Needs counsel",
+      tone: "needs-counsel",
+      body: "Recognition, notice, revocation, enforceability, and employer participation need pilot-state review.",
+    },
+    {
+      label: "Role perimeter",
+      value: "Servicer and funds-flow status",
+      evidence: "Needs counsel",
+      tone: "needs-counsel",
+      body: "Kopis must document whether it controls funds or triggers servicing/licensing obligations.",
+    },
+    {
+      label: "IP path",
+      value: "Narrow continuity claims",
+      evidence: "Assumption",
+      tone: "assumption",
+      body: "The plausible patent area is continuity, rules, orchestration, and revocation state machines.",
+    },
+    {
+      label: "Next output",
+      value: "Five-state counsel packet",
+      evidence: "Next",
+      tone: "next",
+      body: "Create the state memo, borrower authorization draft, provider terms review, and pilot lender template.",
+    },
+  ],
+  "borrower-trust": [
+    {
+      label: "Trust standard",
+      value: "Show the number before consent",
+      evidence: "Verified",
+      tone: "verified",
+      body: "Borrowers need the amount, timing, lender, paycheck source, and support path before authorizing.",
+    },
+    {
+      label: "Open legal item",
+      value: "Revocation mechanics",
+      evidence: "Needs counsel",
+      tone: "needs-counsel",
+      body: "The right to stop or change an authorization needs state-specific timing and copy rules.",
+    },
+    {
+      label: "Confusion risk",
+      value: "Paystub line item",
+      evidence: "Assumption",
+      tone: "assumption",
+      body: "Every payroll label needs a matching explainer so the deduction is not mysterious.",
+    },
+    {
+      label: "Next proof",
+      value: "Consent disclosure v1",
+      evidence: "Next",
+      tone: "next",
+      body: "Draft the screen, event trail, support script, job-change copy, and short-paycheck language.",
+    },
+  ],
+  "market-competitors": [
+    {
+      label: "Market fact",
+      value: "The mechanic exists",
+      evidence: "Verified",
+      tone: "verified",
+      body: "Employer lenders, payroll APIs, consumer proof points, and repayment rails already prove pieces.",
+    },
+    {
+      label: "Kopis wedge",
+      value: "Repayment operations above connectivity",
+      evidence: "Likely",
+      tone: "likely",
+      body: "Connectivity alone does not solve consent, compliance, servicing, reconciliation, and continuity.",
+    },
+    {
+      label: "Category risk",
+      value: "Overclaiming novelty",
+      evidence: "Assumption",
+      tone: "assumption",
+      body: "The stronger pitch is standardizing a lender rail, not pretending payroll deduction is new.",
+    },
+    {
+      label: "Next proof",
+      value: "Highline and middleware benchmark",
+      evidence: "Next",
+      tone: "next",
+      body: "Compare neutrality, multi-lender support, compliance depth, exception handling, and job-change coverage.",
+    },
+  ],
+  "build-pilot": [
+    {
+      label: "Pilot shape",
+      value: "500 to 1,500 opt-ins",
+      evidence: "Assumption",
+      tone: "assumption",
+      body: "The first pilot needs a comparable baseline and measurable repayment-event data.",
+    },
+    {
+      label: "Scope discipline",
+      value: "Middleware first",
+      evidence: "Likely",
+      tone: "likely",
+      body: "One or two provider integrations can prove the rail before direct payroll builds.",
+    },
+    {
+      label: "Legal bound",
+      value: "Five pilot states",
+      evidence: "Needs counsel",
+      tone: "needs-counsel",
+      body: "State choice must follow wage assignment, revocation, servicing, and funds-flow analysis.",
+    },
+    {
+      label: "Success threshold",
+      value: "30%+ 60-day delinquency reduction",
+      evidence: "Next",
+      tone: "next",
+      body: "The threshold is a pilot hypothesis until measured against real portfolio economics.",
+    },
+  ],
+  "growth-system": [
+    {
+      label: "Primary motion",
+      value: "Founder-led lender outreach",
+      evidence: "Likely",
+      tone: "likely",
+      body: "Sell lower loss risk, servicing clarity, and implementation lift to lenders first.",
+    },
+    {
+      label: "Buyer proof",
+      value: "CFO, servicing, compliance, CTO",
+      evidence: "Verified",
+      tone: "verified",
+      body: "The diligence packet must answer each stakeholder's risk, economics, and integration questions.",
+    },
+    {
+      label: "Messaging risk",
+      value: "Consumer wellness framing",
+      evidence: "Assumption",
+      tone: "assumption",
+      body: "A borrower-first pitch makes Kopis look like cash advance instead of lender infrastructure.",
+    },
+    {
+      label: "Next output",
+      value: "Lender pilot one-pager",
+      evidence: "Next",
+      tone: "next",
+      body: "Package baseline, cohort, success criteria, implementation lift, consent, and reconciliation.",
+    },
+  ],
+  "next-moves": [
+    {
+      label: "Operating principle",
+      value: "Narrow risk before scope",
+      evidence: "Verified",
+      tone: "verified",
+      body: "The next seven days should remove unknowns, not add product surface area.",
+    },
+    {
+      label: "Critical path",
+      value: "Counsel, middleware, lender LOI",
+      evidence: "Likely",
+      tone: "likely",
+      body: "The work order runs through counsel, ToS review, pilot-state choice, and design-partner commitment.",
+    },
+    {
+      label: "Blocker",
+      value: "State and role analysis",
+      evidence: "Needs counsel",
+      tone: "needs-counsel",
+      body: "External claims stay provisional until counsel resolves wage assignment, servicing, and funds flow.",
+    },
+    {
+      label: "Next output",
+      value: "Diligence packet v1",
+      evidence: "Next",
+      tone: "next",
+      body: "Assemble legal queue, pilot one-pager, borrower trust draft, and competitive benchmark.",
+    },
+  ],
+};
+
+const commandQueueItems = [
+  {
+    title: "Counsel queue",
+    body: "Narrow wage assignment, funds flow, servicer role, middleware terms, and revocation mechanics.",
+    meta: "Needs counsel",
+    path: "/legal-path",
+    icon: Scale,
+  },
+  {
+    title: "Pilot packet",
+    body: "Lock cohort, baseline, candidate states, middleware path, success threshold, and failure thresholds.",
+    meta: "Assumption",
+    path: "/build-pilot",
+    icon: Gauge,
+  },
+  {
+    title: "Borrower trust draft",
+    body: "Make the authorization, paystub label, revocation path, support path, and job-change flow readable.",
+    meta: "Next",
+    path: "/borrower-trust",
+    icon: ShieldCheck,
+  },
+  {
+    title: "Operating order",
+    body: "Keep the next seven days focused on removing unknowns before adding new product surface area.",
+    meta: "Verified",
+    path: "/next-moves",
+    icon: ListChecks,
+  },
+];
+
+const buyerProofRows: MatrixRow[] = [
+  {
+    first: "Lender CFO",
+    second: "Loss rate reduction, collection cost per loan, unit economics per vertical.",
+    third: "Comparable baseline, pilot cohort economics, success threshold, and commercial conversion math.",
+  },
+  {
+    first: "Lender Head of Servicing",
+    second: "Reconciliation clarity, exception handling, integration effort.",
+    third: "Repayment event ledger, exception queue, support workflow, and operational lift estimate.",
+  },
+  {
+    first: "Lender Compliance",
+    second: "State coverage, consent framework, audit trail, revocation mechanics.",
+    third: "Counsel packet, disclosure versions, authorization log, and revocation-state rules.",
+  },
+  {
+    first: "Lender CTO",
+    second: "API quality, SLA, sandbox, time to pilot.",
+    third: "API flow, middleware terms, sandbox plan, integration checklist, and data-handling schedule.",
+  },
+];
+
+const investorStatusCards: OperatingStatusCard[] = [
+  {
+    label: "Investor posture",
+    value: "Pre-pilot diligence",
+    evidence: "Verified",
+    tone: "verified",
+    body: "The packet should show the wedge, work order, proof gaps, and counsel gates before fundraising claims harden.",
+  },
+  {
+    label: "Primary risk",
+    value: "Legal perimeter unresolved",
+    evidence: "Needs counsel",
+    tone: "needs-counsel",
+    body: "Voluntary wage assignment, servicing role, funds flow, middleware terms, and pilot-state scope remain provisional.",
+  },
+  {
+    label: "Proof order",
+    value: "Pilot before broad category claim",
+    evidence: "Assumption",
+    tone: "assumption",
+    body: "The strongest investor story comes after one lender cohort proves repayment lift and operational control.",
+  },
+  {
+    label: "Next output",
+    value: "Diligence packet v1",
+    evidence: "Next",
+    tone: "next",
+    body: "Package counsel queue, lender pilot brief, borrower trust draft, market map, and PDF materials together.",
+  },
+];
+
+const investorPacketRows: MatrixRow[] = [
+  {
+    first: "Thesis",
+    second: "Payroll linked repayment exists, but lenders still lack a neutral consent, compliance, servicing, reconciliation, and continuity layer.",
+    third: "Use Product, Market, and GTM rooms as source material.",
+  },
+  {
+    first: "Legal queue",
+    second: "Do not hide wage assignment, money transmitter, servicer role, middleware terms, or pilot-state uncertainty.",
+    third: "Export counsel packet and mark all unresolved items counsel-dependent.",
+  },
+  {
+    first: "Pilot plan",
+    second: "Define a narrow personal or medical installment-lender cohort, baseline, success threshold, and failure thresholds.",
+    third: "Export lender brief before any investor-forward growth claim.",
+  },
+  {
+    first: "Trust layer",
+    second: "Show borrower authorization, paystub explanation, revocation path, support path, and job-change continuity.",
+    third: "Pair the investor narrative with borrower-facing proof of comprehension.",
+  },
+];
+
+const exportPacketLinks = [
+  {
+    title: "Counsel Packet",
+    body: "Legal workstreams, funds-flow questions, sequencing, and provisional state analysis.",
+    href: "/export/counsel",
+    icon: Scale,
+  },
+  {
+    title: "Lender Pilot Brief",
+    body: "MVP scope, cohort, implementation lift, success criteria, and buyer proof.",
+    href: "/export/lender",
+    icon: Gauge,
+  },
+  {
+    title: "Investor Brief",
+    body: "Product thesis, wedge, legal queue, pilot path, and operating sequence.",
+    href: "/export/investor",
+    icon: TrendingUp,
+  },
+];
+
 type IpClock = {
   time: string;
   zone: string;
@@ -161,40 +539,6 @@ function LogoMark({
       </span>
       <span className="brand-subtitle">War Room</span>
     </a>
-  );
-}
-
-function ThemeToggle({
-  theme,
-  onThemeChange,
-  compact = false,
-}: {
-  theme: ThemeMode;
-  onThemeChange: (theme: ThemeMode) => void;
-  compact?: boolean;
-}) {
-  const options: { label: string; value: ThemeMode; icon: LucideIcon }[] = [
-    { label: "Day", value: "day", icon: Sun },
-    { label: "Night", value: "night", icon: Moon },
-  ];
-
-  return (
-    <div className={compact ? "theme-toggle compact" : "theme-toggle"} aria-label="War Room theme">
-      {!compact && <span>Theme</span>}
-      <div role="group" aria-label="Day or night color scheme">
-        {options.map(({ label, value, icon: Icon }) => (
-          <button
-            aria-pressed={theme === value}
-            key={value}
-            onClick={() => onThemeChange(value)}
-            type="button"
-          >
-            <Icon size={compact ? 13 : 15} aria-hidden="true" />
-            <span>{label}</span>
-          </button>
-        ))}
-      </div>
-    </div>
   );
 }
 
@@ -271,118 +615,11 @@ function RouteMenu({
   );
 }
 
-function useUnicornStudio(active: boolean) {
-  const [useIframeFallback, setUseIframeFallback] = useState(false);
-
-  useEffect(() => {
-    if (!active) {
-      setUseIframeFallback(false);
-      return;
-    }
-
-    let cancelled = false;
-    let fallbackTimer = 0;
-    let observer: MutationObserver | null = null;
-
-    const initialize = () => {
-      const target = document.querySelector<HTMLElement>(`[data-us-project="${DAY_UNICORN_PROJECT_ID}"]`);
-      if (cancelled || !window.UnicornStudio?.init || !target || target.children.length > 0) {
-        return;
-      }
-
-      observer = new MutationObserver(() => {
-        if (target.children.length > 0) {
-          window.UnicornStudio!.isInitialized = true;
-          setUseIframeFallback(false);
-        }
-      });
-      observer.observe(target, { childList: true });
-
-      try {
-        window.UnicornStudio.isInitialized = false;
-        window.UnicornStudio.init();
-      } catch (error) {
-        window.UnicornStudio.isInitialized = false;
-        console.warn("KOPIS day background failed to initialize", error);
-        return;
-      }
-
-      fallbackTimer = window.setTimeout(() => {
-        if (!cancelled && target.children.length > 0) {
-          window.UnicornStudio!.isInitialized = true;
-          setUseIframeFallback(false);
-        } else if (!cancelled) {
-          setUseIframeFallback(true);
-        }
-      }, 2500);
-    };
-
-    const existingScript = document.getElementById(UNICORN_SCRIPT_ID) as HTMLScriptElement | null;
-
-    if (existingScript) {
-      if (window.UnicornStudio?.init) {
-        initialize();
-      } else {
-        existingScript.addEventListener("load", initialize, { once: true });
-      }
-
-      return () => {
-        cancelled = true;
-        window.clearTimeout(fallbackTimer);
-        observer?.disconnect();
-        existingScript.removeEventListener("load", initialize);
-      };
-    }
-
-    window.UnicornStudio = window.UnicornStudio ?? { isInitialized: false };
-
-    const script = document.createElement("script");
-    script.id = UNICORN_SCRIPT_ID;
-    script.src = UNICORN_SCRIPT_SRC;
-    script.async = true;
-    script.onload = initialize;
-    (document.head || document.body).appendChild(script);
-
-    return () => {
-      cancelled = true;
-      window.clearTimeout(fallbackTimer);
-      observer?.disconnect();
-      script.removeEventListener("load", initialize);
-    };
-  }, [active]);
-
-  return useIframeFallback;
-}
-
 function AmbientField({ theme }: { theme: ThemeMode }) {
-  const useDayIframeFallback = useUnicornStudio(theme === "day");
-
   return (
     <div className="ambient-field" data-theme={theme} aria-hidden="true">
-      <div className="ambient-layer ambient-layer-day" style={{ opacity: theme === "day" ? 1 : 0 }}>
-        {theme === "day" && useDayIframeFallback && (
-          <iframe
-            allow="autoplay; fullscreen"
-            className="unicorn-iframe-background"
-            frameBorder="0"
-            loading="eager"
-            src={DAY_UNICORN_IFRAME_URL}
-            title="KOPIS day ambient background"
-          />
-        )}
-        <div className="unicorn-background" data-us-project={DAY_UNICORN_PROJECT_ID} />
-      </div>
-      <div className="ambient-layer ambient-layer-night" style={{ opacity: theme === "night" ? 1 : 0 }}>
-        <iframe
-          allow="autoplay; fullscreen"
-          className="spline-background"
-          frameBorder="0"
-          id="aura-spline"
-          loading="eager"
-          src={NIGHT_SPLINE_URL}
-          title="KOPIS night ambient background"
-        />
-      </div>
+      <div className="ambient-layer ambient-layer-day" style={{ opacity: theme === "day" ? 1 : 0 }} />
+      <div className="ambient-layer ambient-layer-night" style={{ opacity: theme === "night" ? 1 : 0 }} />
       <div className="ambient-scrim" />
     </div>
   );
@@ -461,9 +698,6 @@ function NavigationHeader({
             type="button"
           >
             <Moon size={16} aria-hidden="true" />
-            <span className="nav-icon-badge" aria-hidden="true">
-              1
-            </span>
           </button>
         </div>
       </nav>
@@ -505,29 +739,6 @@ function useIpClock() {
   }, [browserZone]);
 
   return clock;
-}
-
-function PageHeader({
-  eyebrow,
-  title,
-  body,
-  action,
-}: {
-  eyebrow: string;
-  title: string;
-  body: string;
-  action?: ReactNode;
-}) {
-  return (
-    <section className="page-header">
-      <div>
-        <span className="eyebrow">{eyebrow}</span>
-        <h1>{title}</h1>
-        <p>{body}</p>
-      </div>
-      {action}
-    </section>
-  );
 }
 
 function Panel({
@@ -583,6 +794,44 @@ function WorkList({ items }: { items: WorkItem[] }) {
           <p>{item.body}</p>
         </article>
       ))}
+    </div>
+  );
+}
+
+function ResourceList({ items }: { items: ResourceItem[] }) {
+  return (
+    <div className="resource-list">
+      {items.map((item) => (
+        <article key={item.title}>
+          <FileText size={16} aria-hidden="true" />
+          <div>
+            <strong>{item.title}</strong>
+            <p>{item.detail}</p>
+          </div>
+          <span>{item.kind}</span>
+        </article>
+      ))}
+    </div>
+  );
+}
+
+function ExportPacketLinks() {
+  return (
+    <div className="export-link-grid">
+      {exportPacketLinks.map((link) => {
+        const Icon = link.icon;
+
+        return (
+          <a className="export-link" href={link.href} key={link.title}>
+            <Icon size={17} aria-hidden="true" />
+            <span>
+              <strong>{link.title}</strong>
+              <p>{link.body}</p>
+            </span>
+            <Download size={15} aria-hidden="true" />
+          </a>
+        );
+      })}
     </div>
   );
 }
@@ -834,37 +1083,134 @@ function CommandSignalRail() {
   );
 }
 
+function CommandStatusGrid() {
+  return (
+    <section className="command-status-grid" aria-label="Current KOPIS operating status">
+      {commandStatusCards.map((card) => (
+        <article className="command-status-card" data-tone={card.tone} key={card.label}>
+          <div>
+            <span>{card.label}</span>
+            <em>{card.evidence}</em>
+          </div>
+          <strong>{card.value}</strong>
+          <p>{card.body}</p>
+        </article>
+      ))}
+    </section>
+  );
+}
+
+function CommandQueue({ onNavigate }: { onNavigate: (path: string) => void }) {
+  return (
+    <div className="command-queue-list">
+      {commandQueueItems.map((item) => {
+        const Icon = item.icon;
+
+        return (
+          <button className="command-queue-item" key={item.title} onClick={() => onNavigate(item.path)} type="button">
+            <Icon size={17} aria-hidden="true" />
+            <span>
+              <strong>{item.title}</strong>
+              <small>{item.body}</small>
+            </span>
+            <em>{item.meta}</em>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function RoomBriefing({
+  routeId,
+  eyebrow,
+  title,
+  body,
+}: {
+  routeId: Exclude<RouteId, "command-brief" | "investor-kit">;
+  eyebrow: string;
+  title: string;
+  body: string;
+}) {
+  return (
+    <section className="room-briefing">
+      <div className="room-briefing-copy">
+        <span className="eyebrow">{eyebrow}</span>
+        <h1>{title}</h1>
+        <p>{body}</p>
+      </div>
+      <div className="room-status-grid" aria-label={`${title} operating status`}>
+        {roomStatusCards[routeId].map((card) => (
+          <article className="room-status-card" data-tone={card.tone} key={`${routeId}-${card.label}`}>
+            <div>
+              <span>{card.label}</span>
+              <em>{card.evidence}</em>
+            </div>
+            <strong>{card.value}</strong>
+            <p>{card.body}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function CommandBriefPage({
   onNavigate,
-  theme,
 }: {
   onNavigate: (path: string) => void;
-  theme: ThemeMode;
 }) {
-  const heroLogoSrc = theme === "day" ? "/brand/kopis-logo-day.png" : "/brand/kopis-logo-night.png";
-
   return (
-    <section className="landing-stage">
-      <section className="landing-grid">
-        <div className="landing-copy">
-          <span className="eyebrow landing-eyebrow">Founder Command Center</span>
-          <h1 className="hero-title" aria-label="KOPIS War Room">
-            <span className="hero-logo-shell" aria-hidden="true">
-              <img className="hero-logo" src={heroLogoSrc} alt="" />
-            </span>
-            <span className="hero-war-room">War Room</span>
+    <section className="command-dashboard">
+      <section className="command-hero">
+        <div className="command-hero-copy">
+          <span className="eyebrow">Founder Command Center</span>
+          <h1>
+            <span>KOPIS</span>
+            <strong>War Room</strong>
           </h1>
           <p>
-            Payroll linked repayment system. Third-party lenders integrate once, then orchestrate
-            borrower-consented repayment across payroll systems with compliance, reconciliation, and job-change
-            continuity.
+            Payroll linked repayment system for third-party lenders: consented repayment orchestration, compliance
+            controls, servicing, reconciliation, exception handling, and job-change continuity.
           </p>
         </div>
-        <div className="landing-media-stack">
-          <AudioVisualizer />
-          <CommandSignalRail />
-        </div>
+        <CommandStatusGrid />
       </section>
+
+      <section className="command-operating-grid" aria-label="KOPIS command operating surface">
+        <section className="command-module command-audio-module">
+          <div className="command-module-head">
+            <span className="eyebrow">Briefing media</span>
+            <h2>Founder command audio</h2>
+          </div>
+          <AudioVisualizer compact />
+        </section>
+
+        <section className="command-module command-evidence-module">
+          <div className="command-module-head">
+            <span className="eyebrow">Evidence posture</span>
+            <h2>Keep the hard claims labeled</h2>
+          </div>
+          <CommandSignalRail />
+        </section>
+
+        <section className="command-module command-queue-module">
+          <div className="command-module-head">
+            <span className="eyebrow">Decision gates</span>
+            <h2>Open the room that resolves the risk</h2>
+          </div>
+          <CommandQueue onNavigate={onNavigate} />
+        </section>
+
+        <section className="command-module command-next-module">
+          <div className="command-module-head">
+            <span className="eyebrow">Operating order</span>
+            <h2>Next seven days</h2>
+          </div>
+          <Timeline items={nextSevenDays} />
+        </section>
+      </section>
+
       <PlainEnglishBrief routeId="command-brief" />
     </section>
   );
@@ -873,22 +1219,28 @@ function CommandBriefPage({
 function WhatIsKopisPage() {
   return (
     <>
-      <PageHeader
+      <RoomBriefing
+        routeId="what-is-kopis"
         eyebrow="What Kopis Is"
         title="Payroll linked repayment system."
         body="Kopis is the orchestration layer for borrower-consented wage repayment, compliance controls, servicing workflows, reconciliation, and job-change continuity."
       />
-      <WhatIsKopisFocus />
-      <div className="product-definition-row">
-        <Panel
-          className="product-definition-panel"
-          title="Product definition"
-          eyebrow="Core answer"
-          icon={<Layers3 size={18} aria-hidden="true" />}
-        >
-          <WorkList items={whatIsKopis.slice(0, 2)} />
+      <div className="two-column">
+        <Panel title="Product definition" eyebrow="Core answer" icon={<Layers3 size={18} aria-hidden="true" />}>
+          <WorkList items={whatIsKopis} />
+        </Panel>
+        <Panel title="Non-claims" eyebrow="Positioning guardrails">
+          <ul className="check-list">
+            {nonClaims.map((claim) => (
+              <li key={claim}>{claim}</li>
+            ))}
+          </ul>
         </Panel>
       </div>
+      <Panel title="Product layers" eyebrow="What Kopis owns">
+        <MatrixTable rows={productLayers} headers={["Layer", "Function", "Why it matters"]} />
+      </Panel>
+      <WhatIsKopisFocus />
     </>
   );
 }
@@ -896,12 +1248,12 @@ function WhatIsKopisPage() {
 function LegalPathPage() {
   return (
     <>
-      <PageHeader
+      <RoomBriefing
+        routeId="legal-path"
         eyebrow="Legal Review Plan"
         title="Legal is a product workstream."
         body="The rail should not make final legal claims until counsel narrows wage assignment, funds flow, servicing, middleware, revocation, and pilot-state scope."
       />
-      <PlainEnglishBrief routeId="legal-path" />
       <div className="two-column">
         <Panel title="Counsel queue" eyebrow="Questions to resolve" icon={<Scale size={18} aria-hidden="true" />}>
           <WorkList items={legalQuestions} />
@@ -910,6 +1262,17 @@ function LegalPathPage() {
           <MatrixTable rows={fundsFlowRows} headers={["Actor", "Function", "Open point"]} />
         </Panel>
       </div>
+      <div className="two-column">
+        <Panel title="Legal workstreams" eyebrow="Eight tracks">
+          <WorkList items={legalWorkstreams} />
+        </Panel>
+        <Panel title="Legal sequencing" eyebrow="Counsel order">
+          <Timeline items={legalSequencing} />
+        </Panel>
+      </div>
+      <Panel title="Patent strategy" eyebrow="Narrow and defensible">
+        <WorkList items={patentAngles} />
+      </Panel>
     </>
   );
 }
@@ -917,12 +1280,20 @@ function LegalPathPage() {
 function MarketCompetitorsPage() {
   return (
     <>
-      <PageHeader
+      <RoomBriefing
+        routeId="market-competitors"
         eyebrow="Market Map + Competitors"
         title="The wedge is orchestration, not payroll access alone."
         body="Kopis competes against lender internal builds, employer-linked lenders, payroll APIs used directly, and repayment-adjacent rails."
       />
-      <PlainEnglishBrief routeId="market-competitors" />
+      <div className="two-column">
+        <Panel title="Market signals" eyebrow="What the market already proves">
+          <WorkList items={marketSignals} />
+        </Panel>
+        <Panel title="Claim discipline" eyebrow="Say it this way">
+          <MatrixTable rows={claimsAnalysis.slice(0, 4)} headers={["Claim", "Verdict", "Better framing"]} />
+        </Panel>
+      </div>
       <Panel title="Competitive map" eyebrow="Landscape" icon={<TrendingUp size={18} aria-hidden="true" />}>
         <MatrixTable rows={competitorRows} headers={["Category", "Examples", "What they own", "Kopis wedge"]} />
       </Panel>
@@ -978,12 +1349,12 @@ function MarketPlayerDocument() {
 function BuildPilotPage() {
   return (
     <>
-      <PageHeader
+      <RoomBriefing
+        routeId="build-pilot"
         eyebrow="MVP + Pilot Plan"
         title="Scope the smallest credible repayment rail."
         body="The MVP should prove consented repayment, reconciliation, exception handling, and manual job-change recovery without overbuilding direct payroll integrations."
       />
-      <PlainEnglishBrief routeId="build-pilot" />
       <FactGrid items={pilotFacts} />
       <div className="two-column">
         <Panel title="MVP scope" eyebrow="Build versus defer" icon={<Gauge size={18} aria-hidden="true" />}>
@@ -1000,18 +1371,29 @@ function BuildPilotPage() {
 function GrowthSystemPage() {
   return (
     <>
-      <PageHeader
+      <RoomBriefing
+        routeId="growth-system"
         eyebrow="Lender GTM Plan"
         title="Sell loss reduction with lower operational lift."
         body="The primary buyer is the lender. Borrowers and employers matter, but they support the lender proof story rather than replacing it."
       />
-      <PlainEnglishBrief routeId="growth-system" />
+      <Panel title="Buyer matrix" eyebrow="Who must believe the pilot">
+        <MatrixTable rows={buyerProofRows} headers={["Buyer", "Primary concern", "Proof packet"]} />
+      </Panel>
       <div className="two-column">
         <Panel title="GTM operating logic" eyebrow="Lender-led" icon={<Rocket size={18} aria-hidden="true" />}>
           <WorkList items={growthItems} />
         </Panel>
         <Panel title="Phases" eyebrow="Commercial path" icon={<TrendingUp size={18} aria-hidden="true" />}>
           <Timeline items={gtmPhases} />
+        </Panel>
+      </div>
+      <div className="two-column">
+        <Panel title="Brand thesis" eyebrow="Two audiences, one rail">
+          <WorkList items={brandThesis} />
+        </Panel>
+        <Panel title="Reference architecture" eyebrow="Future content map">
+          <MatrixTable rows={seoArchitecture} headers={["Path", "Intent", "What it must answer"]} />
         </Panel>
       </div>
     </>
@@ -1021,12 +1403,12 @@ function GrowthSystemPage() {
 function BorrowerTrustPage() {
   return (
     <>
-      <PageHeader
+      <RoomBriefing
+        routeId="borrower-trust"
         eyebrow="Borrower Trust + Consent"
         title="The borrower must understand the repayment before they authorize it."
         body="Kopis can be lender-facing infrastructure, but the borrower still needs a plain explanation of the deduction, data access, revocation path, paystub label, job-change flow, and support channel."
       />
-      <PlainEnglishBrief routeId="borrower-trust" />
       <div className="two-column">
         <Panel title="Trust rules" eyebrow="Borrower-facing standard" icon={<ShieldCheck size={18} aria-hidden="true" />}>
           <WorkList items={borrowerTrustPrinciples} />
@@ -1045,12 +1427,12 @@ function BorrowerTrustPage() {
 function NextMovesPage() {
   return (
     <>
-      <PageHeader
+      <RoomBriefing
+        routeId="next-moves"
         eyebrow="Operating Plan"
         title="The next week should narrow risk, not expand scope."
         body="Prioritize legal boundaries, middleware permission, pilot definition, and the lender diligence packet before adding new product surface area."
       />
-      <PlainEnglishBrief routeId="next-moves" />
       <div className="two-column">
         <Panel title="Next seven days" icon={<Clock3 size={18} aria-hidden="true" />}>
           <Timeline items={nextSevenDays} />
@@ -1059,15 +1441,87 @@ function NextMovesPage() {
           <MatrixTable rows={ownerMap} headers={["Owner", "Workstream", "Decision right"]} />
         </Panel>
       </div>
+      <div className="two-column">
+        <Panel title="Critical path" eyebrow="Do these in order">
+          <WorkList items={criticalPath} />
+        </Panel>
+        <Panel title="7 / 30 / 90 day operating plan" eyebrow="Execution horizon">
+          <Timeline items={operatingPlan} />
+        </Panel>
+      </div>
+      <Panel title="Claims audit" eyebrow="Before investor or lender diligence">
+        <MatrixTable rows={claimsAnalysis} headers={["Claim", "Verdict", "Better framing"]} />
+      </Panel>
     </>
   );
 }
 
 function InvestorKitPage() {
   return (
-    <section className="investor-document-route" aria-label="KOPIS investor document">
-      <iframe className="investor-document" src="/docs/KOPIS.pdf" title="KOPIS investor document" />
-    </section>
+    <>
+      <section className="investor-kit-hero">
+        <div className="investor-kit-copy">
+          <span className="eyebrow">Investor Packet</span>
+          <h1>Make the thesis inspectable before the pilot claim gets loud.</h1>
+          <p>
+            The investor surface should package the category wedge, counsel queue, lender pilot plan, borrower trust
+            draft, and current PDF materials without pretending unresolved legal questions are solved.
+          </p>
+        </div>
+        <div className="investor-status-grid" aria-label="Investor packet status">
+          {investorStatusCards.map((card) => (
+            <article className="room-status-card" data-tone={card.tone} key={card.label}>
+              <div>
+                <span>{card.label}</span>
+                <em>{card.evidence}</em>
+              </div>
+              <strong>{card.value}</strong>
+              <p>{card.body}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <div className="two-column">
+        <Panel title="Source PDF" eyebrow="Current document" icon={<FolderOpen size={18} aria-hidden="true" />}>
+          <div className="investor-action-list">
+            <a className="investor-action" href="/docs/KOPIS.pdf">
+              <FileText size={17} aria-hidden="true" />
+              <span>
+                <strong>Open KOPIS.pdf</strong>
+                <small>Use the current PDF as a source artifact, not the only inspectable investor route.</small>
+              </span>
+            </a>
+            <a className="investor-action" href="/export/investor">
+              <Download size={17} aria-hidden="true" />
+              <span>
+                <strong>Print investor brief</strong>
+                <small>Generate the structured investor packet from the live operating content.</small>
+              </span>
+            </a>
+          </div>
+        </Panel>
+
+        <Panel title="Export packets" eyebrow="Audience views" icon={<Download size={18} aria-hidden="true" />}>
+          <ExportPacketLinks />
+        </Panel>
+      </div>
+
+      <Panel title="Diligence packet" eyebrow="What must be visible">
+        <MatrixTable rows={investorPacketRows} headers={["Packet area", "Investor read", "Proof source"]} />
+      </Panel>
+
+      <div className="two-column">
+        <Panel title="Investor resources" eyebrow="Materials">
+          <ResourceList items={investorResources} />
+        </Panel>
+        <Panel title="Brand and trust assets" eyebrow="Support materials">
+          <ResourceList items={brandAssets} />
+        </Panel>
+      </div>
+
+      <PlainEnglishBrief routeId="investor-kit" />
+    </>
   );
 }
 
@@ -1099,7 +1553,7 @@ function RouteContent({
       return <InvestorKitPage />;
     case "command-brief":
     default:
-      return <CommandBriefPage onNavigate={onNavigate} theme={theme} />;
+      return <CommandBriefPage onNavigate={onNavigate} />;
   }
 }
 
@@ -1204,7 +1658,7 @@ function LenderPilotView() {
         </Panel>
       </div>
       <Panel title="What each buyer cares about" eyebrow="Buyer matrix">
-        <MatrixTable rows={buyerNeeds} headers={["Buyer", "Primary concern", ""]} />
+        <MatrixTable rows={buyerProofRows} headers={["Buyer", "Primary concern", "Proof packet"]} />
       </Panel>
       <Panel title="GTM phases" eyebrow="Commercial path">
         <Timeline items={gtmPhases} />
@@ -1217,7 +1671,30 @@ function LenderPilotView() {
 }
 
 function InvestorBriefView() {
-  return <InvestorKitPage />;
+  return (
+    <>
+      <ExportDocumentHeader
+        icon={TrendingUp}
+        title="KOPIS Investor Brief"
+        subtitle="Product thesis, legal queue, pilot proof path, and diligence materials. All legal conclusions remain provisional until counsel review."
+      />
+      <Panel title="Investor thesis" eyebrow="Diligence spine">
+        <MatrixTable rows={investorPacketRows} headers={["Packet area", "Investor read", "Proof source"]} />
+      </Panel>
+      <Panel title="Product definition" eyebrow="What Kopis is">
+        <WorkList items={whatIsKopis} />
+      </Panel>
+      <Panel title="Buyer proof" eyebrow="Lender diligence">
+        <MatrixTable rows={buyerProofRows} headers={["Buyer", "Primary concern", "Proof packet"]} />
+      </Panel>
+      <Panel title="Pilot sequence" eyebrow="Proof before scale">
+        <Timeline items={pilotTimeline} />
+      </Panel>
+      <Panel title="Claims audit" eyebrow="Do not overstate">
+        <MatrixTable rows={claimsAnalysis} headers={["Claim", "Verdict", "Better framing"]} />
+      </Panel>
+    </>
+  );
 }
 
 function App() {
@@ -1285,9 +1762,7 @@ function App() {
         theme={theme}
       />
       <section className="content-shell">
-        {activeRoute.id !== "command-brief" && activeRoute.id !== "investor-kit" && (
-          <TopBar activeRoute={activeRoute} />
-        )}
+        {activeRoute.id !== "command-brief" && <TopBar activeRoute={activeRoute} />}
         <RouteContent route={activeRoute} onNavigate={navigate} theme={theme} />
       </section>
     </main>
