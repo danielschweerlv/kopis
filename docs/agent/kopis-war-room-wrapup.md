@@ -1,5 +1,96 @@
 # KOPIS War Room Wrap-Up
 
+Updated: 2026-06-01T05:00:00-0700
+
+## 2026-06-01 Cloud Continuation State
+
+### Status
+
+- Next session target: cloud/Codex remote environment.
+- GitHub repo: `https://github.com/danielschweerlv/kopis`.
+- Active branch for cloud continuation: `humanize-command-center-20260524`.
+- Default branch: `main`.
+- PR creation URL: `https://github.com/danielschweerlv/kopis/pull/new/humanize-command-center-20260524`.
+- Vercel project is linked locally via `.vercel/project.json`: project `kopis-war-room`, project id `prj_xpSwyn4wVxVMRcHUWHtHCNFBWben`.
+- Vercel CLI auth verified as `danielschweerlv`.
+- Vercel deployments list successfully for `danielschweerlvs-projects/kopis-war-room`; latest listed deployment is Ready.
+- Local dev URL during handoff: `http://127.0.0.1:5191/command-brief` returned `HTTP 200`.
+
+### Cloud-Safe Commit Contents
+
+The cloud branch should include the latest local implementation work, not just the older pushed branch. The handoff commit includes:
+
+- `src/App.tsx`
+- `src/styles.css`
+- `package.json`
+- `package-lock.json`
+- `docs/agent/kopis-war-room-wrapup.md`
+
+Do not rely on local-only dirty files in the cloud. The untracked local files below are intentionally not required for cloud continuation unless Daniel later asks to preserve them:
+
+- `kopislogo.png`
+- `public/brand/kopis-header-wordmark.png` (not referenced by current source)
+- `tmp/qa/**` screenshots/options, including WaveSurfer QA screenshots
+
+Tracked assets required by the app are already in git:
+
+- `public/brand/kopis-logo-day.png`
+- `public/brand/kopis-logo-night.png`
+- `public/media/kopis-introaudio.wav`
+- `public/media/kopis-thesis-explainer.mp4`
+- `public/media/kopis-war-room-brief.m4a`
+
+### Completed Work
+
+- KOPIS War Room was polished heavily across header/navigation, day/night background, audio player, investor PDF route, market page cleanup, and page copy.
+- Production Vercel deploys were run repeatedly and the public alias stayed `https://kopis-war-room.vercel.app`.
+- Git branch `humanize-command-center-20260524` was pushed to GitHub with the War Room polish work.
+- Latest change: replaced the selected custom intro audio block on `/command-brief` with a `wavesurfer.js` waveform player using `/media/kopis-introaudio.wav`.
+- Added dependency: `wavesurfer.js@7.8.10` in `package.json` and `package-lock.json`.
+- The Framer MP3 player link Daniel selected was inspected, but its module source has a proprietary copyright notice, so it was not copied. The local implementation uses the same underlying WaveSurfer library pattern instead.
+- The current dirty tree still builds successfully.
+
+### Verification
+
+- `gh repo view --json nameWithOwner,defaultBranchRef,url` -> `danielschweerlv/kopis`, default branch `main`.
+- `git ls-remote --heads origin humanize-command-center-20260524 main` -> both remote branches are reachable.
+- `vercel whoami` -> `danielschweerlv`.
+- `vercel ls --scope team_8TE9898hK0CMKCkBV3AKp9h7` -> project deployments listed; latest listed deployment Ready.
+- `curl -I --max-time 5 http://127.0.0.1:5191/command-brief` -> `HTTP/1.1 200 OK`.
+- `/Users/daniel/.agents/scripts/agent/handoff.sh` run from repo root.
+- `git diff --check -- src/App.tsx src/styles.css package.json package-lock.json docs/agent/kopis-war-room-wrapup.md` -> passed.
+- `npm run build` -> passed:
+  - `dist/index.html`
+  - `dist/assets/index-DIUteHud.css`
+  - `dist/assets/index-CWNFM9RT.js`
+- Playwright desktop check:
+  - Opened `http://127.0.0.1:5191/command-brief`
+  - WaveSurfer shadow waveform mounted
+  - Clicked play button; playback state advanced to playing
+  - No horizontal overflow at `1200x671`
+  - Screenshot: `tmp/qa/wavesurfer-command-brief.png`
+- Playwright mobile check:
+  - Opened `http://127.0.0.1:5191/command-brief`
+  - WaveSurfer shadow waveform mounted
+  - No horizontal overflow at `390x844`
+  - Screenshot: `tmp/qa/wavesurfer-command-brief-mobile.png`
+
+### Recommended Next Owner
+
+- Codex cloud for the next implementation session.
+- Rationale: the required source, lockfile, handoff context, tracked media assets, GitHub remote, and Vercel linkage are now sufficient for remote continuation.
+
+### Next Steps
+
+1. Cloud session should clone/open `danielschweerlv/kopis` on branch `humanize-command-center-20260524`.
+2. Cloud session should read `AGENTS.md`, `DESIGN.md`, and this file first.
+3. Cloud session should run `npm ci` and `npm run build`.
+4. If doing visual work, cloud session should start a dev server with `npm run dev -- --host 0.0.0.0 --port 5191` or the platform-provided port.
+5. For deployment, use the existing Vercel project `kopis-war-room`; confirm the project/org before deploy.
+6. Do not assume untracked local screenshots exist in the cloud. Regenerate QA screenshots if needed.
+
+---
+
 Updated: 2026-05-22T21:35:00-0700
 
 ## 2026-05-22 Session 2 Summary
