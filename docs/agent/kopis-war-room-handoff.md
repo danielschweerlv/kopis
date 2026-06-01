@@ -11,19 +11,19 @@ Source inspected: Perplexity Computer artifact and task thread in Chrome.
 
 ## What KOPIS Is
 
-Kopis is a lender-agnostic payroll-integrated repayment layer. It lets third-party lenders collect installment repayments directly from borrower wages before funds reach the borrower's bank account.
+Kopis is a payroll linked repayment system. It lets third-party lenders collect installment repayments directly from borrower wages before funds reach the borrower's bank account.
 
 The opportunity is not inventing payroll deduction. The opportunity is a standardized, neutral, multi-lender orchestration layer that any lender can integrate once to reach payroll systems with borrower-consented repayment, state-aware compliance, servicing/reconciliation, and job-change continuity.
 
 Preferred positioning:
 
-- Lender-agnostic payroll repayment infrastructure.
-- Lender-neutral payroll repayment rail.
+- Payroll linked repayment system.
+- Payroll linked repayment system for third-party lenders.
 - One lender integration, many payroll systems.
 
 Avoid:
 
-- "We invented payroll-linked repayment."
+- "We invented payroll linked repayment."
 - "Plaid for payroll" as the primary frame.
 - "Financial wellness" as the buyer-facing pitch.
 - Mortgage as the first vertical.

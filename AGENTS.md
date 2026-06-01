@@ -4,7 +4,7 @@ KOPIS local guidance for Codex sessions.
 
 ## Project
 
-- KOPIS is lender-agnostic payroll repayment infrastructure.
+- KOPIS is a payroll linked repayment system.
 - It is not a lender, not a payroll API, and should not claim it invented payroll deduction.
 - The product is a neutral orchestration, compliance, servicing, reconciliation, borrower consent, and job-change continuity layer for third-party lenders.
 

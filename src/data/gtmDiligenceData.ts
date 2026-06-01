@@ -18,7 +18,7 @@ export const brandThesis: WorkItem[] = [
   },
   {
     title: "UX copy rules",
-    body: "Never use 'garnishment.' Never euphemize debt. Always name the mechanic. Always show the number before asking for consent. Always offer revocation in the same screen.",
+    body: "Avoid punitive wage-collection words. Do not euphemize debt. Name the mechanic, show the number before consent, and put revocation beside authorization.",
     meta: "Copy rules",
   },
 ];
@@ -93,7 +93,7 @@ export const claimsAnalysis: MatrixRow[] = [
   {
     first: "No company has built this",
     second: "Redirect",
-    third: "Lead with the gap: 'Nobody has productized the lender-neutral orchestration rail.' That's accurate and defensible.",
+    third: "Lead with the gap: 'Payroll linked repayment exists; Kopis makes it operable for third-party lenders.' That's accurate and defensible.",
   },
   {
     first: "Kashable is a 1:1 competitor",
@@ -107,18 +107,18 @@ export const claimsAnalysis: MatrixRow[] = [
   },
   {
     first: "Broad patent claims on payroll deduction will hold",
-    second: "Solid",
+    second: "Retire",
     third: "File narrow. Focus on continuity, rules engine, and orchestration — those are the honest IP frontier.",
   },
   {
     first: "Narrow claims around continuity and rules-engine may be defensible",
-    second: "Solid",
+    second: "Counsel-review candidate",
     third: "Base the provisional patent strategy here from day one.",
   },
   {
-    first: "Payroll-linked repayment materially lowers default rates",
+    first: "Payroll linked repayment materially lowers default rates",
     second: "Qualify",
-    third: "Cite third-party evidence explicitly. The pilot generates your own proof.",
+    third: "Treat third-party evidence as directional. The pilot must generate Kopis-specific proof.",
   },
   {
     first: "Mortgage is the right first vertical",
@@ -132,7 +132,7 @@ export const claimsAnalysis: MatrixRow[] = [
   },
   {
     first: "Highline is a direct competitor",
-    second: "Solid",
+    second: "Benchmark",
     third: "Benchmark on neutrality, multi-lender support, compliance depth, and continuity.",
   },
   {
@@ -146,9 +146,9 @@ export const claimsAnalysis: MatrixRow[] = [
     third: "B2B institutional brand for lenders; borrower trust center for the consumer touch.",
   },
   {
-    first: "'Plaid for payroll' framing",
+    first: "Commodity payroll API framing",
     second: "Retire",
-    third: "Own 'lender-agnostic payroll repayment infrastructure.' More accurate, more defensible, harder to compare-shop.",
+    third: "Own 'payroll linked repayment system.' More accurate, more defensible, and harder to compare-shop.",
   },
 ];
 

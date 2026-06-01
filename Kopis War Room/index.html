@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="en" data-tod="night">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KOPIS War Room</title>
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,600,700,800,900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+/* ── TIME-OF-DAY TOKENS ── */
+:root {
+  --bg:#0c111f;--bg2:#090e1a;--surface:#111827;--surface2:#141d2e;--surface3:#1a2540;
+  --text:#e2e8f4;--text-soft:#8a98b4;--muted:#4a5568;
+  --border:rgba(255,255,255,.06);--border-strong:rgba(255,255,255,.12);--hairline:rgba(255,255,255,.03);
+  --nav-panel:var(--bg2);--nav-panel-text:#e8eaf0;
+  --c01:#4B7BFF;--c02:#7B5BEF;--c03:#B84BDD;--c04:#E8339A;--c05:#FF5C35;--c06:#FF9015;--c07:#FFD000;--c08:#7050EE;
+  --good:#4ade80;--warn:#fbbf24;--bad:#f87171;
+  --font:'Satoshi',-apple-system,BlinkMacSystemFont,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+  --nav-h:62px;--radius:16px;--radius-md:10px;--radius-sm:7px;
+}
+[data-tod="daytime"]{
+  --bg:#dde5f5;--bg2:#d4ddf0;--surface:#ffffff;--surface2:#eef2fc;--surface3:#e4eaf8;
+  --text:#0c1830;--text-soft:#3a4c6e;--muted:#7a8aaa;
+  --border:rgba(0,0,80,.07);--border-strong:rgba(0,0,80,.13);--hairline:rgba(0,0,80,.03);
+  --nav-panel:#ede9e3;--nav-panel-text:#0c1830;
+}
+
+/* ── RESET ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100dvh;transition:background .4s,color .4s;overflow-x:hidden;}
+
+/* ── AURORA BACKGROUND ── */
+.spline-bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;}
+.spline-bg iframe{width:100%;height:100%;border:none;display:block;}
+.spline-night{display:block;}
+.spline-day{display:none;}
+[data-tod="daytime"] .spline-night{display:none;}
+[data-tod="daytime"] .spline-day{display:block;}
+
+/* Dot grid at bottom */
+body::after{
+  content:"";position:fixed;bottom:0;left:0;right:0;height:180px;pointer-events:none;z-index:0;
+  background-image:radial-gradient(circle,rgba(148,180,255,.07) 1px,transparent 1px);
+  background-size:24px 24px;
+  -webkit-mask-image:linear-gradient(transparent 0%,rgba(0,0,0,.6) 100%);
+  mask-image:linear-gradient(transparent 0%,rgba(0,0,0,.6) 100%);
+}
+
+/* ── NAV ── */
+nav{
+  position:sticky;top:0;z-index:100;display:flex;align-items:stretch;
+  height:var(--nav-h);
+  background:rgba(10,14,28,.78);
+  border-bottom:1px solid rgba(255,255,255,.07);
+  backdrop-filter:blur(28px) saturate(180%);
+  -webkit-backdrop-filter:blur(28px) saturate(180%);
+}
+[data-tod="daytime"] nav{
+  background:rgba(220,230,248,.78);
+  border-bottom:1px solid rgba(0,0,80,.06);
+}
+.nav-brand{
+  display:flex;align-items:center;padding:0 24px;
+  background:transparent;flex-shrink:0;cursor:pointer;
+}
+.nav-brand img{height:44px;width:auto;object-fit:contain;}
+.logo-night{display:block;}
+.logo-day{display:none;}
+[data-tod="daytime"] .logo-night{display:none;}
+[data-tod="daytime"] .logo-day{display:block;}
+.nav-tabs{display:flex;align-items:center;flex:1;padding:0 8px;gap:2px;overflow-x:auto;scrollbar-width:none;}
+.nav-tabs::-webkit-scrollbar{display:none;}
+.nav-tab{
+  display:flex;align-items:center;gap:5px;padding:0 13px;height:40px;border-radius:8px;
+  font-size:12.5px;font-weight:500;color:var(--text-soft);cursor:pointer;
+  background:none;border:none;font-family:var(--font);white-space:nowrap;
+  transition:background .15s,color .15s;
+}
+.nav-tab:hover{background:var(--surface);color:var(--text);}
+.nav-tab.active{background:var(--surface2);color:var(--text);}
+.nav-tab .dot{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.5;flex-shrink:0;}
+.nav-tab.active .dot{opacity:1;}
+.nav-cta{
+  margin:10px 16px;padding:0 18px;background:#2563EB;color:#fff;border:none;border-radius:8px;
+  font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);
+  white-space:nowrap;display:flex;align-items:center;gap:6px;transition:background .15s;flex-shrink:0;
+}
+.nav-cta:hover{background:#1d4ed8;}
+.nav-cta svg{transition:transform .2s;}
+.nav-cta:hover svg{transform:translateX(2px);}
+
+/* ── PAGE WRAPPER ── */
+.page{position:relative;z-index:1;}
+
+/* ── HOME VIEW ── */
+#homeView{display:block;}
+
+/* Hero split */
+.hero-split{
+  display:grid;grid-template-columns:420px 1fr;min-height:calc(100vh - var(--nav-h) - 220px);
+  max-height:480px;
+}
+@media(max-width:1100px){.hero-split{grid-template-columns:1fr;max-height:none;}}
+.hero-left{padding:48px 40px 36px;display:flex;flex-direction:column;gap:0;}
+.hero-title{font-size:clamp(32px,3.5vw,54px);font-weight:800;letter-spacing:-.04em;line-height:1.05;margin-bottom:10px;}
+.hero-sub{font-size:14px;color:var(--text-soft);line-height:1.65;max-width:340px;margin-bottom:24px;}
+
+/* Day/Night toggle */
+.theme-toggle{display:flex;flex-direction:column;gap:6px;}
+.tod-label{font-size:9.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);}
+.tod-selector{display:flex;gap:6px;}
+.tod-btn{
+  display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;
+  background:none;border:none;font-family:var(--font);padding:0;
+}
+.tod-circle{
+  width:40px;height:40px;border-radius:50%;border:1.5px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;
+  background:var(--surface);transition:background .2s,border-color .2s;font-size:16px;
+}
+.tod-btn.active .tod-circle{background:var(--surface2);border-color:var(--c01);}
+.tod-btn:hover .tod-circle{background:var(--surface2);}
+.tod-name{font-size:9.5px;color:var(--muted);font-weight:500;}
+.tod-btn.active .tod-name{color:var(--text-soft);}
+
+/* Hero right — waveform */
+.hero-right{position:relative;overflow:hidden;padding:24px 32px 24px 0;}
+.waveform-frame{
+  width:100%;height:100%;border:1.5px dashed rgba(148,180,255,.2);border-radius:12px;
+  position:relative;overflow:hidden;background:rgba(0,0,0,.15);
+}
+#waveCanvas{width:100%;height:100%;display:block;}
+@media(max-width:1100px){.hero-right{height:260px;padding:16px;}}
+
+/* ── CARD GRID ── */
+.card-grid{
+  display:grid;grid-template-columns:repeat(8,1fr);gap:0;
+  border-top:1px solid rgba(255,255,255,.07);
+}
+@media(max-width:1100px){.card-grid{grid-template-columns:repeat(4,1fr);}}
+@media(max-width:640px){.card-grid{grid-template-columns:repeat(2,1fr);}}
+.grid-card{
+  padding:22px 20px 20px;border-right:1px solid rgba(255,255,255,.07);cursor:pointer;
+  background:rgba(10,14,28,.78);
+  backdrop-filter:blur(28px) saturate(180%);
+  -webkit-backdrop-filter:blur(28px) saturate(180%);
+  transition:background .15s;
+  display:flex;flex-direction:column;gap:10px;
+}
+[data-tod="daytime"] .grid-card{
+  background:rgba(220,230,248,.78);
+  border-right:1px solid rgba(0,0,80,.06);
+}
+.grid-card:last-child{border-right:none;}
+.grid-card:hover{background:rgba(10,14,28,.88);}
+[data-tod="daytime"] .grid-card:hover{background:rgba(200,215,240,.88);}
+@media(max-width:1100px){
+  .grid-card:nth-child(4n){border-right:none;}
+  .grid-card:nth-child(n+5){border-top:1px solid var(--border);}
+}
+.gc-icon{width:36px;height:36px;margin-bottom:4px;}
+.gc-icon svg{width:36px;height:36px;}
+.gc-num{font-size:11px;font-weight:700;font-family:var(--mono);letter-spacing:.04em;}
+.gc-title{font-size:13.5px;font-weight:700;color:var(--text);line-height:1.2;}
+.gc-desc{font-size:11.5px;color:var(--text-soft);line-height:1.5;flex:1;}
+.gc-arrow{color:var(--muted);font-size:13px;margin-top:4px;transition:transform .15s;}
+.grid-card:hover .gc-arrow{transform:translateX(3px);}
+
+/* ── TAB CONTENT ── */
+.tab-content{display:none;max-width:1200px;margin:0 auto;padding:36px 24px 80px;}
+.tab-content.active{display:block;animation:fadein .25s ease;}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.tab-header{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:28px;flex-wrap:wrap;}
+.back-btn{
+  background:var(--surface);border:1px solid var(--border);color:var(--text-soft);
+  padding:8px 16px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;
+  font-family:var(--font);white-space:nowrap;transition:background .15s;flex-shrink:0;margin-top:4px;
+}
+.back-btn:hover{background:var(--surface2);}
+.stack{display:flex;flex-direction:column;gap:16px;}
+
+/* ── CARDS ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;}
+.card.dark{background:var(--surface2);}
+.card.highlight{background:var(--surface);border-color:var(--border-strong);}
+
+/* ── LABEL ── */
+.label{font-size:9.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--c01);display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+.label::before{content:"";width:14px;height:2px;background:var(--c01);border-radius:999px;flex-shrink:0;}
+
+/* ── TYPE ── */
+h1{font-size:clamp(22px,2.5vw,34px);font-weight:800;letter-spacing:-.03em;line-height:1.1;margin-bottom:6px;}
+h2{font-size:18px;font-weight:700;letter-spacing:-.02em;line-height:1.2;margin-bottom:6px;}
+h3,h4{font-size:13.5px;font-weight:700;line-height:1.2;margin:16px 0 5px;color:var(--text);letter-spacing:-.01em;}
+p{font-size:13.5px;line-height:1.65;color:var(--text-soft);max-width:72ch;}
+p.sub{font-size:12.5px;color:var(--muted);}
+a{color:var(--c01);text-decoration:none;transition:opacity .15s;}
+a:hover{opacity:.75;}
+strong{color:var(--text);font-weight:600;}
+em{color:var(--text);}
+
+/* ── GRIDS ── */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.hero-layout{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;}
+@media(max-width:900px){.grid2,.grid3,.hero-layout{grid-template-columns:1fr;}}
+
+/* ── KPI TILES ── */
+.kpi{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px;}
+.mini{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;min-width:110px;}
+.kpi-label{font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.big{font-size:18px;font-weight:800;letter-spacing:-.02em;color:var(--text);}
+.big.accent{color:var(--c01);}
+.big.good{color:var(--good);}
+.big.warn{color:var(--warn);}
+
+/* ── TABLE ── */
+.tablewrap{overflow:auto;border-radius:var(--radius-md);border:1px solid var(--border);}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;}
+.tbl th,.tbl td{padding:11px 13px;border-bottom:1px solid var(--hairline);vertical-align:top;text-align:left;}
+.tbl th{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);background:var(--surface2);}
+.tbl tbody tr:last-child td{border-bottom:none;}
+.tbl tbody tr:hover{background:var(--surface2);}
+.tbl td strong{color:var(--text);}
+.good{color:var(--good);}.bad{color:var(--bad);}.muted{color:var(--muted);}.warn{color:var(--warn);}
+
+/* ── PILL ── */
+.pill{display:inline-flex;align-items:center;height:18px;padding:0 7px;border-radius:4px;font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--surface3);color:var(--muted);}
+.pill.warn{background:rgba(251,191,36,.12);color:var(--warn);}
+.pill.bad{background:rgba(248,113,113,.12);color:var(--bad);}
+.pill.good{background:rgba(74,222,128,.1);color:var(--good);}
+
+/* ── LISTS ── */
+ul{list-style:none;padding:0;margin:8px 0 4px;}
+ul li{position:relative;padding-left:16px;margin:6px 0;font-size:13.5px;color:var(--text-soft);line-height:1.6;}
+ul li::before{content:"";position:absolute;left:0;top:9px;width:4px;height:4px;border-radius:50%;background:var(--muted);}
+ul.check li::before{background:var(--c01);border-radius:2px;top:8px;}
+ul.x li::before{background:var(--bad);border-radius:2px;top:8px;}
+ul.num{counter-reset:step;padding-left:10px;}
+ul.num li{counter-increment:step;padding-left:28px;}
+ul.num li::before{content:counter(step);left:0;top:1px;width:18px;height:18px;border-radius:5px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;color:var(--muted);font-weight:500;}
+
+/* ── CALLOUT ── */
+.callout{border-left:2px solid var(--c01);background:rgba(75,123,255,.07);padding:11px 15px;border-radius:0 var(--radius-sm) var(--radius-sm) 0;font-size:13.5px;color:var(--text-soft);margin:12px 0;}
+.callout.warn{border-color:var(--warn);background:rgba(251,191,36,.08);}
+
+/* ── KEY-VALUE ── */
+.kv{display:grid;grid-template-columns:160px 1fr;gap:7px 16px;font-size:13px;margin:8px 0;}
+.kv dt{color:var(--muted);font-weight:500;}.kv dd{margin:0;color:var(--text-soft);}
+
+/* ── PHASE TIMELINE ── */
+.phase{display:grid;grid-template-columns:110px 1fr;gap:14px;padding:13px 0;border-top:1px solid var(--hairline);}
+.phase:first-child{border-top:none;padding-top:0;}
+.ph-label{font-size:10px;color:var(--c01);letter-spacing:.1em;text-transform:uppercase;font-weight:700;}
+.ph-sub{font-size:11px;color:var(--muted);margin-top:3px;}
+.phase>div:last-child{color:var(--text-soft);font-size:13.5px;}
+
+/* ── AUDIO HERO CARD ── */
+.audioHero{background:var(--surface2);}
+.audio-topline{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.audio-chip{background:var(--surface3);border:1px solid var(--border);color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:3px 9px;border-radius:5px;}
+.audioTitle{font-size:17px;font-weight:700;color:var(--text);margin-bottom:6px;}
+.audioIntro{font-size:13px;color:var(--text-soft);margin-bottom:16px;max-width:60ch;}
+.audio-frame{background:var(--surface3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px 18px;margin-bottom:16px;}
+.wave-bars{display:flex;gap:3px;align-items:flex-end;height:48px;margin-bottom:10px;}
+.wave-bars span{display:block;width:3px;background:var(--c01);border-radius:2px;opacity:.7;}
+.audio-label{font-size:10px;color:var(--muted);margin-bottom:10px;font-family:var(--mono);}
+audio{width:100%;height:36px;}
+.audio-features{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:4px;}
+@media(max-width:640px){.audio-features{grid-template-columns:1fr;}}
+.audio-feat strong{font-size:12px;font-weight:700;color:var(--text);display:block;margin-bottom:3px;}
+.audio-feat span{font-size:11.5px;color:var(--text-soft);}
+
+/* ── VIDEO ── */
+.video-box{border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--border);}
+.video-box video{width:100%;display:block;aspect-ratio:16/9;}
+.video-caption{display:grid;grid-template-columns:1.4fr .8fr;gap:14px;margin-top:14px;}
+@media(max-width:640px){.video-caption{grid-template-columns:1fr;}}
+.video-note{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;}
+.video-note p,.video-note ul{font-size:12.5px;}
+
+/* ── BRAND ASSETS TAB ── */
+.brand-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:4px;}
+@media(max-width:640px){.brand-grid{grid-template-columns:1fr 1fr;}}
+.upload-zone{border:1.5px dashed var(--border-strong);border-radius:var(--radius-md);padding:22px 14px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;background:var(--surface2);position:relative;}
+.upload-zone:hover{border-color:var(--c01);background:rgba(75,123,255,.06);}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.upload-icon{width:34px;height:34px;margin:0 auto 10px;background:var(--surface3);border:1px solid var(--border);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;}
+.upload-title{font-size:12.5px;font-weight:600;color:var(--text);margin-bottom:3px;}
+.upload-sub{font-size:11px;color:var(--muted);}
+.color-swatches{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0;}
+.swatch{width:46px;height:46px;border-radius:9px;border:1px solid var(--border);cursor:pointer;transition:transform .15s;}
+.swatch:hover{transform:scale(1.1);}
+.swatch-name{font-size:9px;color:var(--text-soft);margin-top:3px;text-align:center;}
+.swatch-label{font-size:9.5px;color:var(--muted);text-align:center;font-family:var(--mono);}
+.font-specimen{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:13px 17px;margin:7px 0;}
+.fs-name{font-size:9.5px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;font-weight:600;}
+.fs-sample{font-size:24px;font-weight:700;color:var(--text);letter-spacing:-.02em;line-height:1.1;}
+.asset-row{display:flex;align-items:center;gap:13px;padding:12px 0;border-top:1px solid var(--hairline);}
+.asset-row:first-child{border-top:none;padding-top:0;}
+.asset-icon{width:36px;height:36px;border-radius:9px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.asset-name{font-size:13px;font-weight:600;color:var(--text);}
+.asset-meta{font-size:11px;color:var(--muted);margin-top:2px;}
+.asset-cta{margin-left:auto;background:var(--surface2);border:1px solid var(--border);color:var(--text-soft);padding:5px 13px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);transition:background .15s;white-space:nowrap;}
+.asset-cta:hover{background:var(--surface3);}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .hero-split{max-height:none;}
+  .hero-left{padding:32px 24px 24px;}
+  .card-grid{grid-template-columns:repeat(4,1fr);}
+}
+@media(max-width:640px){
+  .card-grid{grid-template-columns:repeat(2,1fr);}
+  .hero-left{padding:24px 16px 20px;}
+  .tab-content{padding:24px 16px 60px;}
+}
+  </style>
+</head>
+<body>
+
+<!-- ── AURORA ── -->
+<div class="spline-bg spline-night" aria-hidden="true">
+  <iframe src="https://my.spline.design/liquidgradientabstractbackground-gEjylYLumN1b1CUcuIb8DyUA" frameborder="0" width="100%" height="100%"></iframe>
+</div>
+<div class="spline-bg spline-day" aria-hidden="true">
+  <div data-us-project="qTiAlX0sxkuBOAiL7qHL" style="position:absolute;top:0;left:0;width:100%;height:100%;"></div>
+</div>
+
+<!-- ── NAV ── -->
+<nav>
+  <div class="nav-brand" onclick="showTab('home')" role="button" aria-label="Home">
+    <img src="./kopis-logo-night.png" class="logo-night" alt="KOPIS">
+    <img src="./kopis-logo-day.png" class="logo-day" alt="KOPIS">
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab" data-tab="command-brief"><span class="dot" style="background:var(--c01)"></span>Command Brief</button>
+    <button class="nav-tab" data-tab="core-thesis"><span class="dot" style="background:var(--c02)"></span>Core Thesis</button>
+    <button class="nav-tab" data-tab="legal-path"><span class="dot" style="background:var(--c03)"></span>Legal Path</button>
+    <button class="nav-tab" data-tab="market"><span class="dot" style="background:var(--c04)"></span>Market + Competitors</button>
+    <button class="nav-tab" data-tab="build-pilot"><span class="dot" style="background:var(--c05)"></span>Build + Pilot</button>
+    <button class="nav-tab" data-tab="growth-system"><span class="dot" style="background:var(--c06)"></span>Growth System</button>
+    <button class="nav-tab" data-tab="next-moves"><span class="dot" style="background:var(--c07)"></span>Next Moves</button>
+    <button class="nav-tab" data-tab="investor-kit"><span class="dot" style="background:var(--c08)"></span>Investor Kit</button>
+  </div>
+  <button class="nav-cta" onclick="showTab('command-brief')">
+    Enter War Room
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+</nav>
+
+<!-- ── HOME VIEW ── -->
+<div class="page" id="homeView">
+
+  <!-- Hero split -->
+  <div class="hero-split">
+    <div class="hero-left">
+      <h1 class="hero-title">KOPIS War Room</h1>
+      <p class="hero-sub">A guided operating room for the payroll linked repayment thesis.</p>
+      <div class="theme-toggle">
+        <div class="tod-label">Theme</div>
+        <div class="tod-selector">
+          <button class="tod-btn" data-tod-set="daytime">
+            <div class="tod-circle">☀️</div>
+            <span class="tod-name">Day</span>
+          </button>
+          <button class="tod-btn active" data-tod-set="night">
+            <div class="tod-circle">🌙</div>
+            <span class="tod-name">Night</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="waveform-frame">
+        <canvas id="waveCanvas"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card grid -->
+  <div class="card-grid">
+    <div class="grid-card" data-tab="command-brief">
+      <div class="gc-icon">
+        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="18" cy="18" r="10" stroke="var(--c01)" stroke-width="1.6"/>
+          <circle cx="18" cy="18" r="5" stroke="var(--c01)" stroke-width="1.6" stroke-opacity=".6"/>
+          <circle cx="18" cy="18" r="1.5" fill="var(--c01)"/>
+          <line x1="18" y1="4" x2="18" y2="8" stroke="var(--c01)" stroke-width="1.6" stroke-linecap="round" stroke-opacity=".4"/>
+          <line x1="18" y1="28" x2="18" y2="32" stroke="var(--c01)" stroke-width="1.6" stroke-linecap="round" stroke-opacity=".4"/>
+          <line x1="4" y1="18" x2="8" y2="18" stroke="var(--c01)" stroke-width="1.6" stroke-linecap="round" stroke-opacity=".4"/>
+          <line x1="28" y1="18" x2="32" y2="18" stroke="var(--c01)" stroke-width="1.6" stroke-linecap="round" stroke-opacity=".4"/>
+        </svg>
+      </div>
+      <div class="gc-num" style="color:var(--c01)">01</div>
+      <div class="gc-title">Command Brief</div>
+      <div class="gc-desc">Snapshot of focus, legal gate, pilot target, and next 7 days.</div>
+      <div class="gc-arrow">→</div>
+    </div>
+    <div class="grid-card" data-tab="core-thesis">
+      <div class="gc-icon">
+        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="7" y="5" width="22" height="26" rx="3" stroke="var(--c02)" stroke-width="1.6"/>
+          <line x1="12" y1="12" x2="24" y2="12" stroke="var(--c02)" stroke-width="1.5" stroke-linecap="round" stroke-opacity=".7"/>
+          <line x1="12" y1="17" x2="24" y2="17" stroke="var(--c02)" stroke-width="1.5" stroke-linecap="round" stroke-opacity=".7"/>
+          <line x1="12" y1="22" x2="20" y2="22" stroke="var(--c02)" stroke-width="1.5" stroke-linecap="round" stroke-opacity=".7"/>
+        </svg>
+      </div>
+      <div class="gc-num" style="color:var(--c02)">02</div>
+      <div class="gc-title">Core Thesis</div>
+      <div class="gc-desc">The problem, solution, differentiation, and magnitude.</div>
+      <div class="gc-arrow">→</div>
+    </div>
+    <div class="grid-card" data-tab="legal-path">
+      <div class="gc-icon">
+        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="18" y1="6" x2="18" y2="30" stroke="var(--c03)" stroke-width="1.6" stroke-linecap="round"/>
+          <line x1="11" y1="13" x2="25" y2="13" stroke="var(--c03)" stroke-width="1.6" stroke-linecap="round"/>
+          <path d="M11 13 C11 13 8 19 11 22 C14 25 11 13 11 13Z" stroke="var(--c03)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M25 13 C25 13 28 19 25 22 C22 25 25 13 25 13Z" stroke="var(--c03)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="13" y1="30" x2="23" y2="30" stroke="var(--c03)" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="gc-num" style="color:var(--c03)">03</div>
+      <div class="gc-title">Legal Path</div>
+      <div class="gc-desc">Legal architecture, documentation plan, and risk map.</div>
+      <div class="gc-arrow">→</div>
+    </div>
+    <div class="grid-card" data-tab="market">
+      <div class="gc-icon">
+        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="18" cy="18" r="12" stroke="var(--c04)" stroke-width="1.6"/>
+          <path d="M18 6 L18 18 L28 14" stroke="var(--c04)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M18 18 L8 24" stroke="var(--c04)" stroke-width="1.5" stroke-linecap="round" stroke-opacity=".6"/>
+        </svg>
+      </div>
+      <div class="gc-num" style="color:var(--c04)">04</div>
+      <div class="gc-title">Market + Competitors</div>
+      <div class="gc-desc">Market structure, landscape, and competitive edges.</div>
+      <div class="gc-arrow">→</div>
+    </div>
+    <div class="grid-card" data-tab="build-pilot">
+      <div class="gc-icon">
+        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 6 L30 13 L30 23 L18 30 L6 23 L6 13 Z" stroke="var(--c05)" stroke-width="1.6" stroke-linejoin="round"/>
+          <path d="M18 6 L18 30" stroke="var(--c05)" stroke-width="1.4" stroke-opacity=".45"/>
+          <path d="M6 13 L30 23" stroke="var(--c05)" stroke-width="1.4" stroke-opacity=".45"/>
+          <path d="M30 13 L6 23" stroke="var(--c05)" stroke-width="1.4" stroke-opacity=".45"/>
+        </svg>
+      </div>
+      <div class="gc-num" style="color:var(--c05)">05</div>
+      <div class="gc-title">Build + Pilot</div>
+      <div class="gc-desc">MVP scope, pilot design, timeline, and success criteria.</div>
+      <div class="gc-arrow">→</div>
+    </div>
+    <div class="grid-card" data-tab="growth-system">
+      <div class="gc-icon">
+        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polyline points="5,26 12,18 18,22 26,10 31,14" stroke="var(--c06)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          <polyline points="26,10 31,10 31,14" stroke="var(--c06)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="5" y1="30" x2="31" y2="30" stroke="var(--c06)" stroke-width="1.4" stroke-linecap="round" stroke-opacity=".4"/>
+        </svg>
+      </div>
+      <div class="gc-num" style="color:var(--c06)">06</div>
+      <div class="gc-title">Growth System</div>
+      <div class="gc-desc">Distribution engine, lender flywheel, and unit economics.</div>
+      <div class="gc-arrow">→</div>
+    </div>
+    <div class="grid-card" data-tab="next-moves">
+      <div class="gc-icon">
+        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="7" y="5" width="22" height="26" rx="3" stroke="var(--c07)" stroke-width="1.6"/>
+          <polyline points="12,14 15,17 21,11" stroke="var(--c07)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          <polyline points="12,20 15,23 21,17" stroke="var(--c07)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" stroke-opacity=".6"/>
+          <line x1="12" y1="26" x2="24" y2="26" stroke="var(--c07)" stroke-width="1.5" stroke-linecap="round" stroke-opacity=".35"/>
+        </svg>
+      </div>
+      <div class="gc-num" style="color:var(--c07)">07</div>
+      <div class="gc-title">Next Moves</div>
+      <div class="gc-desc">Immediate priorities, decision log, and owner map.</div>
+      <div class="gc-arrow">→</div>
+    </div>
+    <div class="grid-card" data-tab="investor-kit">
+      <div class="gc-icon">
+        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M5 12 L5 28 Q5 31 8 31 L28 31 Q31 31 31 28 L31 16 Q31 13 28 13 L18 13 L15 8 Q14 5 11 5 L8 5 Q5 5 5 8 Z" stroke="var(--c08)" stroke-width="1.6" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="gc-num" style="color:var(--c08)">08</div>
+      <div class="gc-title">Investor Kit</div>
+      <div class="gc-desc">Deck, brief, audio overview, and brand assets.</div>
+      <div class="gc-arrow">→</div>
+    </div>
+  </div>
+
+</div><!-- end homeView -->
+
+<!-- ════════════ TAB CONTENT ════════════ -->
+
+<!-- 01 COMMAND BRIEF -->
+<div class="tab-content" id="tab-command-brief">
+  <div class="tab-header">
+    <div><div class="label" style="--c01:var(--c01)">01 &mdash; Command Brief</div><h1>Payroll linked lending &mdash; mapped &amp; operationalized.</h1></div>
+    <button class="back-btn" data-back>← All tabs</button>
+  </div>
+  <div class="stack">
+
+    <div class="card audioHero">
+      <div class="audio-topline">
+        <div class="audio-chip">War room audio guide</div>
+        <span style="font-family:var(--mono);font-size:11px;color:var(--muted)">~2:35 runtime</span>
+      </div>
+      <h2 class="audioTitle">Welcome to the Kopis War Room.</h2>
+      <p class="audioIntro">A top-line briefing: what the war room is, how the eight tabs are organized, and how to use this command center week to week.</p>
+      <div class="audio-frame">
+        <div class="wave-bars">
+          <span style="height:28%"></span><span style="height:52%"></span><span style="height:34%"></span><span style="height:76%"></span><span style="height:42%"></span><span style="height:67%"></span><span style="height:31%"></span><span style="height:58%"></span><span style="height:80%"></span><span style="height:45%"></span><span style="height:61%"></span><span style="height:38%"></span><span style="height:72%"></span><span style="height:49%"></span><span style="height:63%"></span><span style="height:35%"></span><span style="height:77%"></span><span style="height:47%"></span><span style="height:56%"></span><span style="height:30%"></span><span style="height:70%"></span><span style="height:44%"></span><span style="height:60%"></span><span style="height:33%"></span>
+        </div>
+        <div class="audio-label">Narrated war room welcome</div>
+        <audio controls preload="metadata" src="./kopis-war-room-intro-3.mp3"></audio>
+      </div>
+      <div class="audio-features">
+        <div class="audio-feat"><strong>Orientation</strong><span>What this command center is, the payroll linked repayment thesis, and how to get oriented fast.</span></div>
+        <div class="audio-feat"><strong>Tab map</strong><span>Walks through what each of the eight tabs covers so you know where strategy, execution, diligence, and assets live.</span></div>
+        <div class="audio-feat"><strong>Operator cadence</strong><span>How to use the war room week to week without wasting time on filler.</span></div>
+      </div>
+    </div>
+
+    <div class="hero-layout">
+      <div class="card dark">
+        <div class="label">Executive read</div>
+        <p><strong>What Kopis is, in one sentence:</strong> a payroll linked repayment system that lets any third-party lender collect loan payments directly from a borrower's wages before the money reaches their bank account.</p>
+        <p style="margin-top:10px"><strong>The real opportunity:</strong> not inventing payroll deduction &mdash; that already exists at Kashable, BMG, TrueConnect, Salary Finance. The opportunity is the <em>orchestration, compliance, servicing, and continuity</em> system that nobody has cleanly productized for third-party lenders.</p>
+        <p style="margin-top:10px"><strong>The right positioning:</strong> Lead with standardization, not invention. Kopis should look like the system of record that makes payroll linked repayment explainable, implementable, and portable across lenders and jobs.</p>
+        <div class="kpi">
+          <div class="mini"><div class="kpi-label">Kopis wedge</div><div class="big accent" style="font-size:13px">Payroll linked system</div></div>
+          <div class="mini"><div class="kpi-label">Status</div><div class="big good">Active</div></div>
+          <div class="mini"><div class="kpi-label">First vertical</div><div class="big" style="font-size:13px">Personal + Medical</div></div>
+          <div class="mini"><div class="kpi-label">Next milestone</div><div class="big warn" style="font-size:13px">Counsel + Pilot</div></div>
+        </div>
+      </div>
+      <div class="card highlight">
+        <div class="label">How the war room flows</div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:12px">Eight tabs keep the dashboard tight: start with orientation, move into thesis and strategy, then work across market, execution, review, and assets.</p>
+        <ul class="check">
+          <li><strong>Command Brief</strong> sets the frame and gives a quick owner briefing.</li>
+          <li><strong>Core Thesis + Legal Path</strong> define what Kopis is and how the business wins.</li>
+          <li><strong>Market + Build + Growth</strong> turn the thesis into an executable build plan.</li>
+          <li><strong>Next Moves + Investor Kit</strong> turn the plan into an investor narrative.</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 02 CORE THESIS -->
+<div class="tab-content" id="tab-core-thesis">
+  <div class="tab-header">
+    <div><div class="label" style="--c01:var(--c02)">02 &mdash; Core Thesis</div><h1>The orchestration layer gap.</h1></div>
+    <button class="back-btn" data-back>← All tabs</button>
+  </div>
+  <div class="stack">
+
+    <div class="card dark">
+      <div class="label" style="--c01:var(--c02)">What Kopis actually does</div>
+      <div class="video-box">
+        <video controls playsinline preload="metadata">
+          <source src="./kopis-thesis-explainer.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="video-caption">
+        <div class="video-note">
+          <p><strong>2:29 explainer</strong> for first-time viewers: lenders, partners, and investors. Covers the lending problem, why payroll linked repayment works, the market gap, and what Kopis is building as the payroll linked repayment system.</p>
+        </div>
+        <div class="video-note">
+          <p><strong>Scenes covered</strong></p>
+          <ul class="check">
+            <li>The lending problem: defaults, collections, checking-account fragility.</li>
+            <li>Payroll linked repayment: the upstream deduction mechanic.</li>
+            <li>The fragmented market: closed systems, no shared rail.</li>
+            <li>Kopis: the payroll linked repayment system.</li>
+            <li>What Kopis is not: not a lender, not a payroll API.</li>
+            <li>The opportunity: trillions in consumer lending, 40&ndash;60% default reduction.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label" style="--c01:var(--c02)">The real strategic thesis</div>
+      <p>Payroll linked repayment is strategically valuable because it collapses three of the most painful variables in unsecured lending at once: <strong>default risk</strong>, <strong>collection cost</strong>, and <strong>underwriting uncertainty</strong>. When repayment happens at the wage level &mdash; before money reaches the borrower's checking account &mdash; the lender's economics change meaningfully enough to justify a new rail.</p>
+      <p style="margin-top:10px">But the market already knows this. Kashable, BMG, Salary Finance, TrueConnect, OneBlinc, and Perpay have all built lending products around it. Pinwheel, Argyle, and Atomic have built the connectivity layer. Highline is building adjacent repayment-rail infrastructure. The category is not empty.</p>
+      <p style="margin-top:10px">What <em>is</em> empty: a standardized, neutral, multi-lender orchestration layer that any lender can integrate once and reach any payroll system with compliant, continuity-aware, borrower-consented repayment. That's the gap Kopis can own.</p>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <div class="label" style="--c01:var(--c02)">Market map: the four layers</div>
+        <dl class="kv">
+          <dt>Employer lenders</dt><dd>Kashable, BMG/LoansAtWork, TrueConnect, Salary Finance, OneBlinc &mdash; <em>originate</em> and collect payroll linked loans through employer distribution.</dd>
+          <dt>Payroll APIs</dt><dd>Pinwheel, Argyle, Atomic &mdash; <em>connect</em> to payroll systems; income/employment verification, paycheck-linked flows.</dd>
+          <dt>Repayment rails</dt><dd>Highline, Perpay-style mechanics &mdash; move money on paycheck cycles, often for a specific use case.</dd>
+          <dt>Lender-agnostic orchestration</dt><dd><strong style="color:var(--c02)">Open.</strong> Nobody cleanly productizes all three layers for any third-party lender, with compliance and continuity.</dd>
+        </dl>
+      </div>
+      <div class="card">
+        <div class="label" style="--c01:var(--c02)">Why the orchestration layer wins</div>
+        <ul class="check">
+          <li>Lenders don't want to rebuild payroll integrations per provider.</li>
+          <li>Connectivity APIs don't own lender-specific servicing logic.</li>
+          <li>Employer lenders don't serve outside lenders.</li>
+          <li>Nobody wants to rebuild the state-by-state wage deduction compliance matrix.</li>
+          <li>Job changes break every existing solution; continuity is a standalone product.</li>
+          <li>Trust and borrower explanation is a shared liability nobody has owned.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <div class="label" style="--c01:var(--c02)">What Kopis is NOT</div>
+        <ul class="x">
+          <li>Not a lender &mdash; does not originate credit.</li>
+          <li>Not a payroll API &mdash; does not own direct payroll integrations where middleware suffices.</li>
+          <li>Not an employer benefits platform &mdash; employer distribution is optional, not required.</li>
+          <li>Not a consumer fintech brand &mdash; primary buyer is the lender.</li>
+          <li>Not inventing payroll deduction &mdash; standardizing how lenders use it.</li>
+        </ul>
+      </div>
+      <div class="card highlight">
+        <div class="label" style="--c01:var(--c02)">What Kopis CAN become</div>
+        <ul class="check">
+          <li>The default repayment rail any lender ships on top of.</li>
+          <li>The compliance authority of record for voluntary payroll linked repayment.</li>
+          <li>The continuity engine across job changes.</li>
+          <li>The borrower trust layer that makes paystub line items understandable.</li>
+          <li>One integration, many payroll systems, many lenders &mdash; the payroll linked repayment system.</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 03 LEGAL PATH -->
+<div class="tab-content" id="tab-legal-path">
+  <div class="tab-header">
+    <div><div class="label" style="--c01:var(--c03)">03 &mdash; Legal Path</div><h1>Legal is a product workstream.</h1></div>
+    <button class="back-btn" data-back>← All tabs</button>
+  </div>
+  <div class="stack">
+    <div class="card"><p>Legal is a core product workstream for Kopis &mdash; it determines where you can operate, with which payroll providers, for which loan types, at what borrower consent level. Build the legal scaffolding in parallel with the product, not after it.</p></div>
+    <div class="grid2">
+      <div class="card">
+        <div class="label" style="--c01:var(--c03)">Patent: where to focus</div>
+        <p>Broad claims around payroll deduction won't survive prior-art review &mdash; Kashable, BMG, Salary Finance, and the payroll APIs provide decades of documented practice. The good news: the genuinely novel territory is in Kopis's actual product differentiators.</p>
+        <p class="sub" style="margin-top:8px">Skip broad claims. File narrow and defensible from day one.</p>
+      </div>
+      <div class="card highlight">
+        <div class="label" style="--c01:var(--c03)">Patent: defensible angles</div>
+        <ul class="check">
+          <li><strong>Employment-change detection and automated re-linking</strong> across payroll systems and employers. (Continuity engine)</li>
+          <li><strong>Compliance rules engine</strong> conditioning deduction schedules on jurisdiction, employer, payroll provider, and loan type.</li>
+          <li><strong>Lender-agnostic orchestration</strong> abstracting multiple payroll connectivity methods behind one repayment interface.</li>
+          <li><strong>Payment allocation, exception handling, and fallback sequencing</strong> when payroll deductions fail.</li>
+          <li><strong>Borrower authorization workflows</strong> tied to specific deduction events, with revocation state machines.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card">
+      <div class="label" style="--c01:var(--c03)">Legal workstreams</div>
+      <div class="grid2">
+        <div>
+          <h4>Patent / prior art / FTO</h4><p class="sub">Freedom-to-operate analysis vs. Kashable, BMG, Pinwheel, Argyle, Atomic, Highline, Salary Finance patents. Narrow claim drafting. Provisional sequencing.</p>
+          <h4>Lending + servicing licensing</h4><p class="sub">Kopis is not a lender but its rails touch loan servicing. Determine whether Kopis is a servicer, a payment processor, a money transmitter, or none &mdash; by state and product type.</p>
+          <h4>Payroll provider agreements</h4><p class="sub">Direct integration vs. middleware changes the contract stack. Terms must permit third-party repayment use cases and borrower-authorized data flows.</p>
+          <h4>Borrower authorization</h4><p class="sub">Consent must be informed, specific, revocable, and documented. Must cover data access, deduction, employer visibility, and downstream servicing events.</p>
+        </div>
+        <div>
+          <h4>Employer agreements</h4><p class="sub">When employer involvement is required, you need an enforceable paper trail. Where employer involvement is optional, design it out.</p>
+          <h4>Privacy + data handling</h4><p class="sub">Wage, employer, and paystub data are sensitive. GLBA, state privacy laws, and consumer reporting rules apply depending on data use.</p>
+          <h4>Wage deduction analysis (state-by-state)</h4><p class="sub">Voluntary wage assignments are governed by a patchwork of state statutes. Build the matrix once, version it, and treat it as core IP.</p>
+          <h4>Consumer protection exposure</h4><p class="sub">UDAAP, TILA, FDCPA adjacencies depend on whether Kopis touches origination, servicing, or collection. Clarify role precisely.</p>
+        </div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div class="label" style="--c01:var(--c03)">Questions counsel must answer</div>
+        <ul class="num">
+          <li>In which states is voluntary wage assignment legally recognized for third-party lenders without employer participation?</li>
+          <li>Does Kopis need a money transmitter license in any state given its payment orchestration role?</li>
+          <li>Is Kopis a "servicer" under any state installment loan act?</li>
+          <li>What are the revocation requirements for borrower authorization, and can they be done electronically?</li>
+          <li>Are payroll API middleware ToS permissive for third-party lender repayment use cases?</li>
+          <li>Does any existing patent materially read on the continuity or rules-engine angles?</li>
+          <li>What disclosures are required to the borrower at deduction time, and in what form?</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="label" style="--c01:var(--c03)">Legal sequencing</div>
+        <ul class="num">
+          <li>Provisional patent on narrow orchestration + continuity claims.</li>
+          <li>FTO memo on the eight closest comparators.</li>
+          <li>State-by-state wage deduction matrix, v1 (5 pilot states).</li>
+          <li>Licensing analysis in pilot states.</li>
+          <li>Borrower authorization form + revocation flow drafted.</li>
+          <li>Payroll provider ToS review for pilot middleware.</li>
+          <li>Pilot lender agreement template.</li>
+          <li>Privacy policy and data-handling schedule.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 04 MARKET + COMPETITORS -->
+<div class="tab-content" id="tab-market">
+  <div class="tab-header">
+    <div><div class="label" style="--c01:var(--c04)">04 &mdash; Market + Competitors</div><h1>Competitive landscape, categorized.</h1></div>
+    <button class="back-btn" data-back>← All tabs</button>
+  </div>
+  <div class="stack">
+    <div class="card">
+      <p class="sub">Not every payroll-adjacent player is a 1:1 competitor. This table groups them by actual role in the stack &mdash; so you can pitch against them accurately and spot partnership angles.</p>
+      <div class="tablewrap" style="margin-top:14px">
+        <table class="tbl">
+          <thead><tr><th>Company</th><th>Category</th><th>What they do</th><th>Competition type</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Kashable</strong></td><td>Employer lender</td><td>Employer-sponsored installment loans repaid via payroll allotment or deduction.</td><td><span class="pill warn">Partial</span></td></tr>
+            <tr><td><strong>BMG Money / LoansAtWork</strong></td><td>Employer lender</td><td>Employee loans repaid via payroll deduction or ACH fallback.</td><td><span class="pill warn">Partial</span></td></tr>
+            <tr><td><strong>TrueConnect</strong></td><td>Employer lender</td><td>Small-dollar payroll-deducted loans through employers.</td><td><span class="pill warn">Partial</span></td></tr>
+            <tr><td><strong>Salary Finance</strong></td><td>Employer lender</td><td>Salary-linked financial wellness loans.</td><td><span class="pill warn">Partial</span></td></tr>
+            <tr><td><strong>OneBlinc</strong></td><td>Niche lender</td><td>Loans for government employees with payroll linked underwriting.</td><td><span class="pill">Adjacent</span></td></tr>
+            <tr><td><strong>Pinwheel</strong></td><td>Payroll API</td><td>Payroll connectivity, income verification, direct deposit switching, paycheck-linked lending flows.</td><td><span class="pill warn">Partial</span></td></tr>
+            <tr><td><strong>Argyle</strong></td><td>Payroll API</td><td>Consumer-permissioned payroll data and employment verification platform.</td><td><span class="pill">Adjacent</span></td></tr>
+            <tr><td><strong>Atomic</strong></td><td>Payroll API</td><td>Direct deposit switching + payroll linked connectivity.</td><td><span class="pill">Adjacent</span></td></tr>
+            <tr><td><strong>Highline</strong></td><td>Repayment rail</td><td>Payroll linked payments infrastructure for lenders and billers.</td><td><span class="pill bad">Direct</span></td></tr>
+            <tr><td><strong>Perpay</strong></td><td>Consumer rail</td><td>Paycheck-linked consumer shopping / credit product.</td><td><span class="pill">Adjacent</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div class="label" style="--c01:var(--c04)">How to read the map</div>
+        <ul>
+          <li><strong>Employer lenders</strong> prove payroll-deducted lending works, but they cap their TAM at the employer channel and cannot serve outside lenders.</li>
+          <li><strong>Payroll APIs</strong> prove connectivity works, but they are not lender-facing servicing layers and do not own compliance logic for repayment.</li>
+          <li><strong>Repayment rails</strong> like Highline are the closest comparable &mdash; and the one to actively watch, benchmark, and differentiate against.</li>
+          <li><strong>Consumer rails</strong> like Perpay prove borrowers accept paycheck-linked repayment as a mechanic.</li>
+        </ul>
+      </div>
+      <div class="card highlight">
+        <div class="label" style="--c01:var(--c04)">Kopis's honest position</div>
+        <p>Kopis is <strong>adjacent</strong> to payroll APIs (may even partner), <strong>adjacent-competitive</strong> with employer lenders (different buyer), and <strong>directly competitive</strong> with Highline in the repayment-system space &mdash; with a wider multi-lender, multi-vertical, continuity-first wedge.</p>
+        <p class="sub" style="margin-top:8px">Accurate positioning builds more credibility than overstatement &mdash; and opens partnership conversations with the players you're not competing with.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="label" style="--c01:var(--c04)">Strengths to steal</div>
+      <div class="grid2">
+        <div>
+          <h4>Trust-building patterns</h4>
+          <ul class="check">
+            <li>Borrowed institutional trust: employer logos, benefits framing, credit union partnerships.</li>
+            <li>Concrete repayment mechanics shown early &mdash; not vague "financial wellness" language.</li>
+            <li>Explicit APR + eligibility ranges visible on hero pages.</li>
+            <li>No surprise: consent and linkage explained before being asked for.</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Gaps competitors leave open</h4>
+          <ul class="x">
+            <li>No clean term of art for "payroll linked repayment system."</li>
+            <li>Borrowers get almost no explanation of how a deduction will appear on their paystub.</li>
+            <li>Revocation flows are buried or undocumented.</li>
+            <li>Job change scenarios treated as exception handling, not a core user story.</li>
+            <li>No visual deduction simulator anywhere in the category.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 05 BUILD + PILOT -->
+<div class="tab-content" id="tab-build-pilot">
+  <div class="tab-header">
+    <div><div class="label" style="--c01:var(--c05)">05 &mdash; Build + Pilot</div><h1>Product definition and pilot plan.</h1></div>
+    <button class="back-btn" data-back>← All tabs</button>
+  </div>
+  <div class="stack">
+    <div class="card"><div class="label" style="--c01:var(--c05)">Product definition</div><p><strong>Kopis is a payroll-integrated repayment platform for lenders.</strong> It lets a lender integrate once and collect installment repayments directly from borrower wages across many payroll systems, with borrower consent, state-aware compliance, job-switch continuity, and reconciliation baked in.</p></div>
+    <div class="card">
+      <div class="label" style="--c01:var(--c05)">Product layers</div>
+      <div class="grid2">
+        <div>
+          <h4>1. Lender-facing API + orchestration</h4><p class="sub">Single integration point. Lender creates a repayment plan, Kopis executes it across whichever payroll connectivity path applies.</p>
+          <h4>2. Payroll connectivity layer</h4><p class="sub">Abstracts middleware (Pinwheel / Argyle / Atomic) and direct payroll integrations behind one interface. Connectivity is rented where it makes sense.</p>
+          <h4>3. Compliance rules engine</h4><p class="sub">State, employer, payroll provider, and loan-type rules encoded as first-class data. Every deduction passes the engine.</p>
+          <h4>4. Borrower authorization system</h4><p class="sub">Informed consent, scope, revocation, audit trail. Consent travels with every deduction event.</p>
+        </div>
+        <div>
+          <h4>5. Servicing + reconciliation</h4><p class="sub">Deduction scheduling, partial payments, NSF analogues, retries, payoff calculations, lender statements.</p>
+          <h4>6. Exception handling</h4><p class="sub">What happens when payroll is late, reduced, paused, or unreachable. Fallback waterfall is a product, not an edge case.</p>
+          <h4>7. Job-switch continuity engine</h4><p class="sub">Detect employment change, notify borrower, re-authorize, re-link at new employer, resume without losing the loan.</p>
+          <h4>8. Borrower dashboard / trust layer</h4><p class="sub">Transparent view of upcoming deductions, pay-stub explainer, revocation, job-change status, support.</p>
+        </div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div class="label" style="--c01:var(--c05)">MVP scope &mdash; build</div>
+        <ul class="check">
+          <li>Lender API for plan creation, consent intake, and deduction scheduling.</li>
+          <li>Middleware-based connectivity for one or two payroll providers (via Pinwheel / Argyle / Atomic).</li>
+          <li>Compliance rules engine seeded with 5 pilot states.</li>
+          <li>Borrower authorization flow with explicit scope + revocation.</li>
+          <li>Basic servicing and reconciliation dashboards for the lender.</li>
+          <li>Job-change detection v1 &mdash; notify borrower, pause loan, manual re-link.</li>
+          <li>Minimal borrower trust center with pay-stub explainer + FAQ.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="label" style="--c01:var(--c05)">Not in v1 &mdash; explicitly deferred</div>
+        <ul class="x">
+          <li>Direct payroll integrations (let middleware do this at first).</li>
+          <li>Mortgage vertical (Phase 3 &mdash; operational complexity, RESPA exposure).</li>
+          <li>Multi-lender payment waterfall prioritization.</li>
+          <li>Automated re-link across employers (manual for pilot).</li>
+          <li>Employer-facing portal (not the buyer in v1).</li>
+          <li>Fifty-state compliance matrix (five is enough for pilot).</li>
+          <li>White-labeled borrower dashboard.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card highlight">
+      <div class="label" style="--c01:var(--c05)">Pilot execution plan</div>
+      <p>The pilot is the first real proof of the thesis. Everything about it must be designed to generate one defensible number: the loss-rate delta between payroll linked repayment and the lender's historical baseline, on a comparable cohort.</p>
+      <div class="callout" style="margin-top:12px"><strong>Best first pilot:</strong> mid-market <em>personal installment lender</em>, 5 pilot states, Pinwheel or Argyle middleware, 6-month pilot, 500&ndash;1,500 borrowers opt-in, comparable baseline cohort held constant.</div>
+      <div class="grid2" style="margin-top:16px">
+        <div>
+          <h4>Why personal + medical first</h4>
+          <ul class="check">
+            <li>Short duration = fast pilot proof (3&ndash;9 months of data).</li>
+            <li>State compliance tractable in 5-state scope.</li>
+            <li>Borrowers see the benefit immediately &mdash; improves opt-in rates.</li>
+            <li>Lender loss-rate baseline is well-documented and easy to compare against.</li>
+          </ul>
+          <p class="sub" style="margin-top:10px">Mortgage is a strong Phase 3 target &mdash; loan sizes are compelling &mdash; but duration, escrow entanglement, and RESPA complexity make it the wrong place to generate first-pilot proof.</p>
+        </div>
+        <div>
+          <h4>Success criteria</h4>
+          <ul class="check">
+            <li>&ge;30% reduction in 60+ day delinquency.</li>
+            <li>&lt;5% revocation rate.</li>
+            <li>&lt;10% exception rate.</li>
+            <li>Pilot lender commits to commercial contract.</li>
+          </ul>
+          <h4 style="margin-top:16px">Pilot must generate</h4>
+          <ul class="check">
+            <li>A defensible loss-rate delta and methodology writeup.</li>
+            <li>A borrower experience case study.</li>
+            <li>A compliance playbook for the 5 pilot states.</li>
+            <li>A commercial ROI worksheet investors can redline.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 06 GROWTH SYSTEM -->
+<div class="tab-content" id="tab-growth-system">
+  <div class="tab-header">
+    <div><div class="label" style="--c01:var(--c06)">06 &mdash; Growth System</div><h1>Go-to-market, brand, and SEO.</h1></div>
+    <button class="back-btn" data-back>← All tabs</button>
+  </div>
+  <div class="stack">
+    <div class="card"><p>Kopis sells to lenders. Borrowers and employers are downstream beneficiaries, not the buyer. The sales motion must be B2B, ROI-led, and rooted in loss rate and collection cost economics.</p></div>
+    <div class="grid2">
+      <div class="card">
+        <div class="label" style="--c01:var(--c06)">Primary ICPs</div>
+        <ul class="check">
+          <li><strong>Mid-market installment lenders</strong> ($50M&ndash;$500M originations) looking to lower default rates.</li>
+          <li><strong>Medical payment plan providers</strong> tied to elective procedures and patient financing.</li>
+          <li><strong>Subprime-adjacent personal lenders</strong> where payroll linking materially improves economics.</li>
+          <li><strong>Auto lenders</strong> in a second phase &mdash; long duration, high collection cost.</li>
+          <li><strong>Specialty SMB lenders</strong> where owner payroll access is common.</li>
+        </ul>
+      </div>
+      <div class="card highlight">
+        <div class="label" style="--c01:var(--c06)">Best initial customer</div>
+        <p>A mid-market personal or medical installment lender with &gt;$100M in annual originations, a visible loss-rate problem, and no in-house payroll integration effort. They have the volume to move unit economics, the pain to justify a pilot, and no sunk cost in a competing rail.</p>
+        <p class="sub" style="margin-top:8px">Not: giant banks (too slow), not tiny neobanks (too light on servicing), not employer-benefits lenders (already own the channel differently).</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="label" style="--c01:var(--c06)">Revenue model</div>
+      <div class="grid3">
+        <div class="card dark">
+          <div class="kpi-label">Transaction fees</div>
+          <div class="big" style="color:var(--c06);font-size:22px">1&ndash;2%</div>
+          <p class="sub" style="margin-top:6px">Per payroll-deducted transaction. $7.5B+ annually at scale (projection at full market penetration).</p>
+        </div>
+        <div class="card dark">
+          <div class="kpi-label">Lender SaaS</div>
+          <div class="big" style="color:var(--c06);font-size:22px">$10K&ndash;$1M</div>
+          <p class="sub" style="margin-top:6px">Annual subscription per institution. Scales with volume and feature tier.</p>
+        </div>
+        <div class="card dark">
+          <div class="kpi-label">Enterprise licensing</div>
+          <div class="big" style="color:var(--c06);font-size:22px">$10M+</div>
+          <p class="sub" style="margin-top:6px">Major banks pay annually to white-label the system.</p>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="label" style="--c01:var(--c06)">GTM phases</div>
+      <div class="phase"><div><div class="ph-label">Phase 1</div><div class="ph-sub">0&ndash;9 months</div></div><div><strong>Pilot.</strong> One design-partner lender, 5 states, one payroll middleware, one loan vertical. Goal: prove loss-rate and collection-cost deltas against the lender's own baseline.</div></div>
+      <div class="phase"><div><div class="ph-label">Phase 2</div><div class="ph-sub">9&ndash;24 months</div></div><div><strong>Early commercialization.</strong> Three to five paying lenders, 15+ states, two middleware backends, second loan vertical (medical or auto), reconciliation dashboard hardened.</div></div>
+      <div class="phase"><div><div class="ph-label">Phase 3</div><div class="ph-sub">24+ months</div></div><div><strong>Scale.</strong> National compliance coverage, selective direct payroll integrations, third vertical (including mortgage), enterprise lender logos, platform-level pricing.</div></div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div class="label" style="--c01:var(--c06)">First pitch &mdash; lead with this</div>
+        <ul class="check">
+          <li>"Your loss rate on payroll-eligible borrowers drops materially when we move repayment upstream of the checking account."</li>
+          <li>"One integration, many payroll systems, compliant across your footprint."</li>
+          <li>"We own the compliance matrix and the borrower consent trail so your servicing team doesn't have to."</li>
+          <li>"If a borrower changes jobs, your loan doesn't go delinquent &mdash; we re-link."</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="label" style="--c01:var(--c06)">Framings to avoid in first pitch</div>
+        <ul class="x">
+          <li>"We invented payroll linked repayment" &mdash; the category has prior art; lead with the gap you fill.</li>
+          <li>"This is a patent play" &mdash; your moat is execution, not filing.</li>
+          <li>"Plaid for payroll" &mdash; maps you to a commodity API; own "payroll linked repayment system."</li>
+          <li>"Financial wellness" &mdash; vague; lenders want loss rate and collection cost numbers.</li>
+          <li>Mortgage as the first vertical &mdash; save the conversation for after pilot proof.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card">
+      <div class="label" style="--c01:var(--c06)">SEO architecture</div>
+      <div class="grid2">
+        <div>
+          <h4>Lender-intent clusters</h4>
+          <ul><li>Payroll linked loan repayment infrastructure</li><li>Payroll API for lenders</li><li>Alternative to ACH loan repayment</li><li>Reduce loan default rate payroll</li><li>Voluntary payroll deduction loan</li><li>Payroll deduction compliance by state</li></ul>
+        </div>
+        <div>
+          <h4>Borrower-intent clusters (defensive)</h4>
+          <ul><li>What is [paystub line item]</li><li>How to cancel payroll deduction for a loan</li><li>What happens to payroll deduction when I change jobs</li><li>Paycheck-linked loan repayment explained</li></ul>
+          <h4 style="margin-top:14px">Key pages to build now</h4>
+          <ul class="check"><li>Home, /platform, /verticals/personal, /verticals/medical</li><li>/compliance (5 pilot states)</li><li>/trust root + paystub explainer for pilot line item</li><li>/compare/pinwheel, /compare/highline, /compare/ewa</li></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 07 NEXT MOVES -->
+<div class="tab-content" id="tab-next-moves">
+  <div class="tab-header">
+    <div><div class="label" style="--c01:var(--c07)">07 &mdash; Next Moves</div><h1>Claims sharpened + critical path.</h1></div>
+    <button class="back-btn" data-back>← All tabs</button>
+  </div>
+  <div class="stack">
+    <div class="card">
+      <div class="label" style="--c01:var(--c07)">Analysis review &mdash; claims sharpened</div>
+      <p class="sub" style="margin-bottom:14px">Claim-by-claim review &mdash; what holds, what needs sharpening, and the better framing for each.</p>
+      <div class="tablewrap">
+        <table class="tbl">
+          <thead><tr><th>Claim</th><th>Status</th><th>Context</th><th>Better framing</th></tr></thead>
+          <tbody>
+            <tr><td>"No company has built this"</td><td class="warn">Redirect</td><td>Kashable, BMG, TrueConnect, Salary Finance, Pinwheel, Argyle, Atomic, and Highline are all in adjacent or overlapping space.</td><td>Lead with the gap: "Payroll linked repayment exists; Kopis makes it operable for third-party lenders." Accurate and defensible.</td></tr>
+            <tr><td>Kashable is a 1:1 competitor</td><td class="warn">Sharpen</td><td>Kashable is a vertically integrated employer lender &mdash; they originate, collect, and own the channel. Kopis is a neutral rail for other lenders.</td><td>"Kashable proves the mechanic. Kopis productizes the rail."</td></tr>
+            <tr><td>Pinwheel is what Kopis wants to build</td><td class="warn">Sharpen</td><td>Pinwheel is the strongest connectivity layer and a potential partner &mdash; not the thing to build.</td><td>Position Pinwheel/Argyle/Atomic as inputs Kopis abstracts &mdash; not competitors to out-build.</td></tr>
+            <tr><td>Broad patent claims on payroll deduction will hold</td><td class="bad">Retire</td><td>Prior art is well-documented across employer lenders and payroll APIs. Broad claims won't survive review.</td><td>File narrow. Focus on continuity, rules engine, and orchestration &mdash; those are the honest IP frontier.</td></tr>
+            <tr><td>Narrow claims around continuity and rules-engine may be defensible</td><td class="good">Solid</td><td>These map directly to what Kopis is actually building. This is the right target for counsel.</td><td>Base the provisional patent strategy here from day one.</td></tr>
+            <tr><td>Payroll linked repayment materially lowers default rates</td><td class="warn">Qualify</td><td>Industry evidence from Kashable and TrueConnect supports it &mdash; Kopis doesn't have its own data yet.</td><td>Cite third-party evidence explicitly. The pilot generates your own proof.</td></tr>
+            <tr><td>Mortgage is the right first vertical</td><td class="bad">Retire</td><td>Duration, escrow entanglement, RESPA, and lender procurement cycles make mortgage a Phase 3 target.</td><td>Personal and medical installment first. Mortgage is compelling long-term &mdash; not the pilot.</td></tr>
+            <tr><td>Highline is a direct competitor</td><td class="good">Solid</td><td>Closest repayment-rail comparator in the market right now.</td><td>Benchmark on neutrality, multi-lender support, compliance depth, and continuity.</td></tr>
+            <tr><td>"Plaid for payroll" framing</td><td class="bad">Retire</td><td>Maps Kopis to a commodity data API and undersells the orchestration, compliance, and servicing layers.</td><td>Own "payroll linked repayment system." More accurate, more defensible.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="label" style="--c01:var(--c07)">Founder operating plan</div>
+      <p style="margin-bottom:16px">This is the most practical page in the dashboard. Everything else supports it. Every item below is sequenced so that nothing blocks on something that hasn't happened yet.</p>
+      <div class="label" style="--c01:var(--c07)">Critical path</div>
+      <ul class="num">
+        <li>Retain patent / fintech counsel with voluntary wage deduction experience.</li>
+        <li>Draft narrow provisional patent (continuity, rules engine, orchestration).</li>
+        <li>FTO memo against the 8 closest comparables.</li>
+        <li>Pick 5 pilot states with counsel.</li>
+        <li>Select payroll middleware partner (Pinwheel or Argyle) and verify ToS.</li>
+        <li>Sign design-partner LOI with one pilot lender.</li>
+        <li>Build MVP (API, consent, rules engine v1, reconciliation v1, trust center v1).</li>
+        <li>Launch pilot. Instrument metrics.</li>
+        <li>Raise seed on pilot data + design-partner logo.</li>
+      </ul>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div class="label" style="--c01:var(--c07)">Next 7 days</div>
+        <ul class="check">
+          <li>Shortlist 3 fintech/patent counsel firms and book intros.</li>
+          <li>Send outreach to 10 target pilot lenders.</li>
+          <li>Write the 1-page Kopis brief for counsel (from this dashboard).</li>
+          <li>Draft provisional patent skeleton with narrow claims only.</li>
+          <li>Sanity-check positioning with 2 trusted operators.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="label" style="--c01:var(--c07)">Next 30 days</div>
+        <ul class="check">
+          <li>Retain counsel. Begin FTO memo.</li>
+          <li>Sign NDA + discovery call with first pilot lender prospects.</li>
+          <li>Evaluate Pinwheel / Argyle / Atomic middleware.</li>
+          <li>Spec the MVP in writing. Publish a private tech RFC.</li>
+          <li>Build the borrower trust center copy drafts.</li>
+          <li>Publish the state-compliance matrix v0 (internal).</li>
+        </ul>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div class="label" style="--c01:var(--c07)">Next 90 days</div>
+        <ul class="check">
+          <li>Design-partner LOI with first lender signed.</li>
+          <li>FTO memo complete.</li>
+          <li>Provisional patent filed.</li>
+          <li>Middleware selected and contract in place.</li>
+          <li>MVP build underway (API + consent + rules engine).</li>
+          <li>State compliance matrix v1 (5 pilot states) validated.</li>
+          <li>Seed pitch deck refreshed with pilot commitment.</li>
+          <li>Investor warm-intro list built.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="label" style="--c01:var(--c07)">What can wait</div>
+        <ul>
+          <li>Direct payroll integrations.</li><li>50-state compliance coverage.</li><li>Mortgage, auto, SMB verticals.</li>
+          <li>Employer-facing portal.</li><li>White-label borrower dashboard.</li>
+          <li>Press, brand campaigns, thought leadership.</li><li>International expansion.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="grid3">
+      <div class="card dark"><div class="kpi-label">Before fundraising</div><ul><li>Counsel engaged</li><li>Provisional filed</li><li>Pilot LOI signed</li><li>MVP scope locked</li><li>State matrix v1</li></ul></div>
+      <div class="card dark"><div class="kpi-label">Before pilot</div><ul><li>Middleware contract</li><li>Borrower auth flow</li><li>Rules engine v1</li><li>Reconciliation v1</li><li>Trust center v1</li></ul></div>
+      <div class="card dark"><div class="kpi-label">Before legal spend escalates</div><ul><li>FTO memo</li><li>Narrow claim set</li><li>Pilot state list</li><li>Middleware ToS review</li><li>Role clarification</li></ul></div>
+    </div>
+  </div>
+</div>
+
+<!-- 08 INVESTOR KIT -->
+<div class="tab-content" id="tab-investor-kit">
+  <div class="tab-header">
+    <div><div class="label" style="--c01:var(--c08)">08 &mdash; Investor Kit</div><h1>Deck, brief, and brand assets.</h1></div>
+    <button class="back-btn" data-back>← All tabs</button>
+  </div>
+  <div class="stack">
+    <div class="card">
+      <div class="label" style="--c01:var(--c08)">Logos</div>
+      <div class="brand-grid">
+        <div class="upload-zone" id="zone-primary"><input type="file" accept="image/*,.svg" onchange="handleUpload(this,'zone-primary','preview-primary','name-primary')"><div class="upload-icon" id="preview-primary">◎</div><div class="upload-title">Primary Logo</div><div class="upload-sub" id="name-primary">SVG, PNG, or PDF</div></div>
+        <div class="upload-zone" id="zone-dark"><input type="file" accept="image/*,.svg" onchange="handleUpload(this,'zone-dark','preview-dark','name-dark')"><div class="upload-icon" id="preview-dark">◎</div><div class="upload-title">Dark / Reversed</div><div class="upload-sub" id="name-dark">For dark backgrounds</div></div>
+        <div class="upload-zone" id="zone-mark"><input type="file" accept="image/*,.svg" onchange="handleUpload(this,'zone-mark','preview-mark','name-mark')"><div class="upload-icon" id="preview-mark">◎</div><div class="upload-title">Icon / Mark</div><div class="upload-sub" id="name-mark">Standalone symbol</div></div>
+        <div class="upload-zone" id="zone-wordmark"><input type="file" accept="image/*,.svg" onchange="handleUpload(this,'zone-wordmark','preview-wordmark','name-wordmark')"><div class="upload-icon" id="preview-wordmark">◎</div><div class="upload-title">Wordmark</div><div class="upload-sub" id="name-wordmark">Text-only version</div></div>
+        <div class="upload-zone" id="zone-horiz"><input type="file" accept="image/*,.svg" onchange="handleUpload(this,'zone-horiz','preview-horiz','name-horiz')"><div class="upload-icon" id="preview-horiz">◎</div><div class="upload-title">Horizontal Lockup</div><div class="upload-sub" id="name-horiz">Logo + name</div></div>
+        <div class="upload-zone" id="zone-favicon"><input type="file" accept="image/*,.svg,.ico" onchange="handleUpload(this,'zone-favicon','preview-favicon','name-favicon')"><div class="upload-icon" id="preview-favicon">◎</div><div class="upload-title">Favicon</div><div class="upload-sub" id="name-favicon">16&times;16 / 32&times;32</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="label" style="--c01:var(--c08)">Brand Colors</div>
+      <p class="sub" style="margin-bottom:12px">Click a swatch to copy its hex value.</p>
+      <div class="color-swatches" id="swatchContainer"></div>
+      <button onclick="addSwatch()" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:6px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);margin-top:4px">+ Add color</button>
+    </div>
+    <div class="card">
+      <div class="label" style="--c01:var(--c08)">Typography</div>
+      <div class="font-specimen"><div class="fs-name">Primary &mdash; Satoshi</div><div class="fs-sample" style="font-family:'Satoshi',sans-serif">Aa Bb Cc 123</div></div>
+      <div class="font-specimen"><div class="fs-name">Monospace &mdash; JetBrains Mono</div><div class="fs-sample" style="font-family:'JetBrains Mono',monospace;font-size:20px">01 $1,200.00</div></div>
+    </div>
+    <div class="card">
+      <div class="label" style="--c01:var(--c08)">Investor Deck</div>
+      <div style="width:100%;aspect-ratio:16/9;border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-top:10px;background:var(--surface2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--muted)">
+        <div style="font-size:28px">📊</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text)">Investor Deck</div>
+        <div style="font-size:12px;text-align:center;max-width:260px">Copy <code style="font-family:var(--mono);font-size:11px;background:var(--surface3);padding:2px 6px;border-radius:4px">kopis-investor-deck.slides.html</code> into this folder to enable preview</div>
+      </div>
+      <div style="display:flex;gap:14px;margin-top:12px;flex-wrap:wrap"><a href="./kopis-investor-deck.slides.html" target="_blank" rel="noopener noreferrer">Open deck &rarr;</a><a href="./kopis-investor-deck.pptx" download>Download PPTX &darr;</a></div>
+    </div>
+    <div class="card">
+      <div class="label" style="--c01:var(--c08)">Brand Materials</div>
+      <div id="assetList">
+        <div class="asset-row"><div class="asset-icon">📋</div><div><div class="asset-name">Brand Guidelines</div><div class="asset-meta">PDF &mdash; not yet uploaded</div></div><button class="asset-cta" onclick="triggerUpload('mat-guidelines')">Upload</button><input type="file" id="mat-guidelines" accept=".pdf,.ai,.fig,.sketch" style="display:none" onchange="markUploaded(this)"></div>
+        <div class="asset-row"><div class="asset-icon">🎨</div><div><div class="asset-name">Figma / Design Source</div><div class="asset-meta">Figma, Sketch, or AI file</div></div><button class="asset-cta" onclick="triggerUpload('mat-figma')">Upload</button><input type="file" id="mat-figma" accept=".fig,.sketch,.ai,.psd" style="display:none" onchange="markUploaded(this)"></div>
+        <div class="asset-row"><div class="asset-icon">🖼</div><div><div class="asset-name">Photography / Imagery</div><div class="asset-meta">Brand photography or stock set</div></div><button class="asset-cta" onclick="triggerUpload('mat-photos')">Upload</button><input type="file" id="mat-photos" accept="image/*" multiple style="display:none" onchange="markUploaded(this)"></div>
+        <div class="asset-row"><div class="asset-icon">📝</div><div><div class="asset-name">Copy + Messaging Doc</div><div class="asset-meta">Positioning, taglines, boilerplate</div></div><button class="asset-cta" onclick="triggerUpload('mat-copy')">Upload</button><input type="file" id="mat-copy" accept=".pdf,.doc,.docx,.txt,.md" style="display:none" onchange="markUploaded(this)"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── COLORFUL BAR WAVEFORM ── */
+(function(){
+  const canvas = document.getElementById('waveCanvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let t = 0;
+  const COLS = 72, DOT_R = 2.4, DOT_SPACING = 8;
+  function resize(){const r=canvas.getBoundingClientRect();canvas.width=r.width*devicePixelRatio;canvas.height=r.height*devicePixelRatio;}
+  window.addEventListener('resize',resize); resize();
+  function colHue(i){return 225-(i/COLS)*190;}
+  function barH(i,t){const x=i/COLS;const v=Math.sin(x*7.5-t*1.4)*.28+Math.sin(x*4.2+t*.9+1.1)*.22+Math.sin(x*11-t*2.1-.8)*.14+Math.sin(x*2.8+t*.5+2.4)*.16;return Math.min(.92,Math.max(.08,.45+v));}
+  function draw(){
+    const W=canvas.width,H=canvas.height,dpr=devicePixelRatio;
+    ctx.clearRect(0,0,W,H);
+    const pW=W/dpr,pH=H/dpr,colW=pW/COLS,maxDots=Math.floor((pH*.9)/DOT_SPACING);
+    for(let i=0;i<COLS;i++){
+      const frac=barH(i,t),activeDots=Math.round(frac*maxDots),hue=colHue(i),cx=(i+.5)*colW;
+      for(let d=0;d<maxDots;d++){
+        const y=pH-(d+.5)*DOT_SPACING-pH*.04,isActive=d<activeDots;
+        ctx.save();ctx.scale(dpr,dpr);ctx.beginPath();ctx.arc(cx,y,DOT_R,0,Math.PI*2);
+        if(isActive){const bright=.55+(d/activeDots)*.45;ctx.fillStyle=`hsla(${hue},90%,${55+bright*15}%,${.75+bright*.25})`;if(d>activeDots-3){ctx.shadowColor=`hsl(${hue},100%,70%)`;ctx.shadowBlur=6*dpr;}}
+        else{ctx.fillStyle=`hsla(${hue},40%,30%,0.07)`;}
+        ctx.fill();ctx.restore();
+      }
+    }
+    t+=.012;requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ── TAB NAVIGATION ── */
+const TAB_MAP = {
+  'command-brief':'tab-command-brief','core-thesis':'tab-core-thesis',
+  'legal-path':'tab-legal-path','market':'tab-market','build-pilot':'tab-build-pilot',
+  'growth-system':'tab-growth-system','next-moves':'tab-next-moves','investor-kit':'tab-investor-kit'
+};
+
+function showTab(tabKey){
+  const homeView = document.getElementById('homeView');
+  const isHome = !tabKey || tabKey === 'home';
+  homeView.style.display = isHome ? 'block' : 'none';
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+  if(!isHome && TAB_MAP[tabKey]){
+    const el = document.getElementById(TAB_MAP[tabKey]);
+    if(el) el.classList.add('active');
+    const btn = document.querySelector(`.nav-tab[data-tab="${tabKey}"]`);
+    if(btn) btn.classList.add('active');
+  }
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+document.querySelectorAll('.nav-tab[data-tab]').forEach(btn =>
+  btn.addEventListener('click', () => showTab(btn.dataset.tab))
+);
+document.querySelectorAll('.grid-card[data-tab]').forEach(card =>
+  card.addEventListener('click', () => showTab(card.dataset.tab))
+);
+document.querySelectorAll('[data-back]').forEach(btn =>
+  btn.addEventListener('click', () => showTab('home'))
+);
+
+/* ── TIME OF DAY ── */
+document.querySelectorAll('.tod-btn[data-tod-set]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tod = btn.dataset.todSet;
+    document.documentElement.setAttribute('data-tod', tod);
+    document.querySelectorAll('.tod-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+/* Sync initial active button to default data-tod */
+(function(){
+  const cur = document.documentElement.getAttribute('data-tod') || 'night';
+  const btn = document.querySelector(`.tod-btn[data-tod-set="${cur}"]`);
+  if(btn){ document.querySelectorAll('.tod-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); }
+})();
+
+/* ── ASSET UPLOAD ── */
+function handleUpload(input, zoneId, previewId, nameId){
+  const file = input.files[0]; if(!file) return;
+  const zone = document.getElementById(zoneId);
+  const preview = document.getElementById(previewId);
+  const nameEl = document.getElementById(nameId);
+  zone.style.borderStyle = 'solid'; zone.style.borderColor = 'var(--c08)';
+  nameEl.textContent = file.name;
+  if(file.type.startsWith('image/')){
+    const reader = new FileReader();
+    reader.onload = e => { preview.innerHTML=''; preview.style.cssText='width:100%;height:60px;border-radius:6px;background:url('+e.target.result+') center/contain no-repeat;font-size:0'; };
+    reader.readAsDataURL(file);
+  } else { preview.textContent='✓'; preview.style.color='var(--c08)'; }
+}
+function triggerUpload(id){ document.getElementById(id)?.click(); }
+function markUploaded(input){
+  if(!input.files.length) return;
+  const row = input.closest('.asset-row'); if(!row) return;
+  row.querySelector('.asset-meta').textContent = input.files[0].name;
+  row.querySelector('.asset-cta').textContent = 'Replace';
+}
+
+/* ── COLOR SWATCHES ── */
+const defaultColors=[
+  {hex:'#4B7BFF',name:'Blue 01'},{hex:'#7B5BEF',name:'Violet 02'},{hex:'#B84BDD',name:'Purple 03'},
+  {hex:'#E8339A',name:'Pink 04'},{hex:'#FF5C35',name:'Orange 05'},{hex:'#FF9015',name:'Amber 06'},
+  {hex:'#FFD000',name:'Gold 07'},{hex:'#7050EE',name:'Violet 08'},
+  {hex:'#0c111f',name:'Navy Deep'},{hex:'#111827',name:'Surface'},{hex:'#e2e8f4',name:'Off-white'},
+  {hex:'#4ade80',name:'Good'},{hex:'#fbbf24',name:'Warn'},{hex:'#f87171',name:'Error'},
+];
+function createSwatch(item){
+  const hex=typeof item==='string'?item:item.hex;
+  const name=typeof item==='string'?hex:item.name;
+  const wrap=document.createElement('div'); wrap.style.textAlign='center';
+  const sw=document.createElement('div'); sw.className='swatch'; sw.style.background=hex; sw.title='Click to copy';
+  sw.addEventListener('click',()=>{ navigator.clipboard?.writeText(hex).catch(()=>{}); sw.style.outline='2px solid var(--c01)'; setTimeout(()=>sw.style.outline='',700); });
+  const nameEl=document.createElement('div'); nameEl.className='swatch-name'; nameEl.textContent=name;
+  const label=document.createElement('div'); label.className='swatch-label'; label.textContent=hex;
+  wrap.appendChild(sw); wrap.appendChild(nameEl); wrap.appendChild(label); return wrap;
+}
+function addSwatch(){ const h=prompt('Enter hex color:','#'); if(!h||!/^#?[0-9a-f]{3,8}$/i.test(h)) return; const c=h.startsWith('#')?h:'#'+h; document.getElementById('swatchContainer')?.appendChild(createSwatch({hex:c,name:'Custom'})); }
+(function(){ const c=document.getElementById('swatchContainer'); if(c) defaultColors.forEach(i=>c.appendChild(createSwatch(i))); })();
+
+/* ── PRE-SEED LOGOS ── */
+(function(){
+  const seeds=[
+    {zone:'zone-primary',preview:'preview-primary',name:'name-primary',src:'./kopis-logo-site-ink-transparent.png',label:'kopis-logo-site-ink-transparent.png'},
+    {zone:'zone-dark',preview:'preview-dark',name:'name-dark',src:'./kopis-logo-site-dark-transparent.png',label:'kopis-logo-site-dark-transparent.png'},
+    {zone:'zone-horiz',preview:'preview-horiz',name:'name-horiz',src:'./kopis-logo-site-nav.png',label:'kopis-logo-site-nav.png'},
+  ];
+  seeds.forEach(({zone,preview,name,src,label})=>{
+    const z=document.getElementById(zone); const p=document.getElementById(preview); const n=document.getElementById(name);
+    if(!z||!p||!n) return;
+    z.style.borderStyle='solid'; z.style.borderColor='var(--c08)';
+    p.style.cssText='width:100%;height:60px;border-radius:6px;background:url('+src+') center/contain no-repeat;font-size:0';
+    n.textContent=label;
+  });
+})();
+</script>
+<script type="text/javascript">
+  !function(){if(!window.UnicornStudio){window.UnicornStudio={isInitialized:!1};var i=document.createElement("script");i.src="https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.4.29/dist/unicornStudio.umd.js",i.onload=function(){window.UnicornStudio.isInitialized||(UnicornStudio.init(),window.UnicornStudio.isInitialized=!0)},(document.head || document.body).appendChild(i)}}();
+</script>
+</body>
+</html>
