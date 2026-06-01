@@ -155,17 +155,17 @@ export const claimsAnalysis: MatrixRow[] = [
 export const operatingPlan: TimelineItem[] = [
   {
     date: "Next 7 days",
-    title: "Next 7 days",
+    title: "Counsel, outreach, and the brief",
     body: "Shortlist 3 fintech/patent counsel firms and book intros. Send outreach to 10 target pilot lenders. Write the 1-page Kopis brief for counsel. Draft provisional patent skeleton with narrow claims only. Sanity-check positioning with 2 trusted operators.",
   },
   {
     date: "Next 30 days",
-    title: "Next 30 days",
+    title: "Retain counsel, evaluate middleware, spec the MVP",
     body: "Retain counsel. Begin FTO memo. Sign NDA + discovery call with first pilot lender prospects. Evaluate Pinwheel / Argyle / Atomic middleware. Spec the MVP in writing. Build borrower trust center copy drafts. Publish state-compliance matrix v0 (internal).",
   },
   {
     date: "Next 90 days",
-    title: "Next 90 days",
+    title: "LOI, FTO memo, provisional patent, MVP build",
     body: "Design-partner LOI signed. FTO memo complete. Provisional patent filed. Middleware selected and contract in place. MVP build underway. State compliance matrix v1 (5 pilot states) validated. Seed pitch deck refreshed. Investor warm-intro list built.",
   },
 ];

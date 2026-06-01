@@ -1,13 +1,10 @@
 export type RouteId =
-  | "command-brief"
-  | "what-is-kopis"
-  | "legal-path"
-  | "market-competitors"
-  | "build-pilot"
-  | "growth-system"
-  | "borrower-trust"
-  | "next-moves"
-  | "investor-kit";
+  | "thesis"
+  | "already-exists"
+  | "competitors"
+  | "difference"
+  | "technology"
+  | "next-30";
 
 export type RouteDefinition = {
   id: RouteId;
@@ -51,240 +48,162 @@ export type ResourceItem = {
 
 export const routes: RouteDefinition[] = [
   {
-    id: "command-brief",
+    id: "thesis",
     number: "01",
-    path: "/command-brief",
-    label: "Command Brief",
-    summary: "Plain-English starting point: what Kopis is, what is unproven, and what to do next.",
+    path: "/thesis",
+    label: "Thesis",
+    summary: "What Kopis is in plain English: the product, the buyer, the wedge, and what it is not.",
     accent: "blue-green",
   },
   {
-    id: "what-is-kopis",
+    id: "already-exists",
     number: "02",
-    path: "/what-is-kopis",
-    label: "What Kopis Is",
-    summary: "The simplest explanation of the product, buyer, wedge, and non-claims.",
+    path: "/already-exists",
+    label: "Already Exists?",
+    summary: "The honest answer: parts of this already exist, and where Kopis still has an opening.",
     accent: "blue",
   },
   {
-    id: "legal-path",
+    id: "competitors",
     number: "03",
-    path: "/legal-path",
-    label: "Legal Review Plan",
-    summary: "Counsel questions, role boundaries, documents, and state-by-state proof needs.",
-    accent: "violet",
-  },
-  {
-    id: "borrower-trust",
-    number: "04",
-    path: "/borrower-trust",
-    label: "Borrower Trust + Consent",
-    summary: "Consent, paystub clarity, revocation, data access, and job-change explanations.",
-    accent: "iris",
-  },
-  {
-    id: "market-competitors",
-    number: "05",
-    path: "/market-competitors",
-    label: "Market Map + Competitors",
-    summary: "Who already exists, what they prove, and where Kopis can still win.",
+    path: "/competitors",
+    label: "Top 5 Competitors",
+    summary: "The five players to know, what they do well, and how Kopis is different.",
     accent: "pink",
   },
   {
-    id: "build-pilot",
-    number: "06",
-    path: "/build-pilot",
-    label: "MVP + Pilot Plan",
-    summary: "The smallest credible product and the proof the first lender pilot must generate.",
-    accent: "coral",
+    id: "difference",
+    number: "04",
+    path: "/difference",
+    label: "KOPIS Difference",
+    summary: "Why Kopis is still worth building even though parts of the market already exist.",
+    accent: "iris",
   },
   {
-    id: "growth-system",
-    number: "07",
-    path: "/growth-system",
-    label: "Lender GTM Plan",
-    summary: "How to sell to lenders without confusing borrowers, employers, or investors.",
-    accent: "amber",
-  },
-  {
-    id: "next-moves",
-    number: "08",
-    path: "/next-moves",
-    label: "Operating Plan",
-    summary: "The work order: counsel, middleware, pilot scope, lender proof, and receipt.",
-    accent: "coral",
-  },
-  {
-    id: "investor-kit",
-    number: "09",
-    path: "/investor-kit",
-    label: "Investor Packet",
-    summary: "Investor, lender, and counsel packets without pretending unresolved items are solved.",
+    id: "technology",
+    number: "05",
+    path: "/technology",
+    label: "Technology",
+    summary: "What the technology actually does: the layers, the repayment flow, and what to build first.",
     accent: "violet",
+  },
+  {
+    id: "next-30",
+    number: "06",
+    path: "/next-30",
+    label: "Next 30 Days",
+    summary: "The operating plan: proof, counsel review, and a cleaner lender story.",
+    accent: "coral",
   },
 ];
 
 export const plainEnglishBriefs: Record<RouteId, WorkItem[]> = {
-  "command-brief": [
+  thesis: [
     {
       title: "What this means",
-      body: "Kopis is a control room for one idea: lenders can lower repayment risk when borrowers clearly authorize repayment from payroll instead of waiting for money to hit a checking account.",
+      body: "A borrower takes a loan, agrees to repay it straight from their paycheck, and Kopis runs the parts in between: consent, the rules, the setup, and the follow-up.",
     },
     {
       title: "Why it matters",
-      body: "The business only works if lenders, borrowers, payroll partners, and counsel all understand the same simple story.",
+      body: "It only works if lenders, borrowers, payroll partners, and counsel all read the same simple story. So we keep the story simple.",
     },
     {
       title: "What could go wrong",
-      body: "Confusing consent, unclear paystub language, weak state-law analysis, or messy reconciliation can break trust fast.",
+      body: "Confusing consent, an unclear paystub line, a weak read on state law, or messy reconciliation can break trust fast.",
     },
     {
       title: "What we need to prove next",
-      body: "Pick the first lender cohort, confirm the legal path, verify middleware permission, and show one clean repayment flow end to end.",
+      body: "Pick the first lender, confirm the legal path, check that the payroll middleware allows it, and show one clean repayment from start to finish.",
     },
   ],
-  "what-is-kopis": [
+  "already-exists": [
     {
       title: "What this means",
-      body: "Kopis is not the lender and not the payroll login tool. It is the layer that tells lenders how to set up, explain, track, and recover payroll linked repayments.",
+      body: "Parts of this are already on the market. Payroll deduction loans, paycheck-linked rails, and payroll APIs all exist today.",
     },
     {
       title: "Why it matters",
-      body: "Lenders can connect to payroll tools directly, but they still need consent, rules, servicing, reconciliation, and job-change recovery.",
+      body: "Pretending Kopis invented payroll deduction makes the pitch easy to poke holes in. The honest version is stronger.",
     },
     {
       title: "What could go wrong",
-      body: "If Kopis sounds like a payroll API or a consumer cash-advance app, buyers will compare it to the wrong category.",
+      body: "If we overclaim, a sharp investor or lender finds the existing players in five minutes and the story falls apart.",
     },
     {
       title: "What we need to prove next",
-      body: "Show a payroll linked repayment workflow where one lender can create a repayment plan and keep the borrower informed at every step.",
+      body: "Show the one thing no one owns yet: the neutral layer that handles consent, compliance, servicing, and continuity for many lenders at once.",
     },
   ],
-  "legal-path": [
+  competitors: [
     {
       title: "What this means",
-      body: "The legal work is part of the product. It decides where Kopis can operate, what it can say, and what the borrower must be shown.",
+      body: "Five players matter most: Highline, Truv, and Pinwheel on the repayment rail, and Kashable and BMG on employer lending.",
     },
     {
       title: "Why it matters",
-      body: "Payroll linked repayment touches wages, loan servicing, data access, revocation, and state rules. None of those can be waved away.",
+      body: "A buyer needs a simple map they can hold in their head, not a list of twenty names with no ranking.",
     },
     {
       title: "What could go wrong",
-      body: "A state-by-state assumption, a weak authorization form, or an unclear funds-flow role can turn a good product idea into a legal blocker.",
+      body: "Treating a payroll API like a head-to-head rival sends the pitch into the wrong fight. Some of these are inputs, not enemies.",
     },
     {
       title: "What we need to prove next",
-      body: "Counsel must review wage assignment, revocation, money transmission, servicing role, middleware terms, and pilot-state scope.",
+      body: "Benchmark Highline and the payroll middleware, then show where Kopis is different: consent, compliance, servicing, reconciliation, and continuity.",
     },
   ],
-  "market-competitors": [
+  difference: [
     {
       title: "What this means",
-      body: "The market is not empty. Employer lenders, payroll APIs, EWA apps, and repayment rails already prove parts of the behavior.",
+      body: "Kopis is not trying to prove payroll deduction works. It is trying to make payroll-linked repayment usable for many lenders at once.",
     },
     {
       title: "Why it matters",
-      body: "Kopis wins only if it owns the neutral orchestration layer lenders do not want to build themselves.",
+      body: "No lender wants to wire up every payroll provider, write its own consent logic, and read 50 states of rules. That is the work Kopis takes on.",
     },
     {
       title: "What could go wrong",
-      body: "Overclaiming novelty makes the pitch brittle. The stronger pitch is simple: others prove the mechanic; Kopis standardizes the lender rail.",
+      body: "If the difference sounds like jargon, buyers lump Kopis in with payroll APIs or employer lenders and stop listening.",
     },
     {
       title: "What we need to prove next",
-      body: "Benchmark Highline and payroll middleware, then show where Kopis is different: consent, compliance, servicing, reconciliation, and continuity.",
+      body: "Show one lender integration running across more than one payroll system, with consent and reconciliation handled in one place.",
     },
   ],
-  "build-pilot": [
+  technology: [
     {
       title: "What this means",
-      body: "The pilot is not a demo. It is a controlled test to learn whether payroll linked repayment improves a lender's real portfolio economics.",
+      body: "If Kopis is not a lender and not a payroll API, the technology is the operating layer that sits above payroll connectivity and runs the repayment.",
     },
     {
       title: "Why it matters",
-      body: "Investors and lenders need proof from a comparable borrower cohort, not a polished story about future scale.",
+      body: "It answers the fair question: if Kopis is not a lender and not a payroll API, what is the actual product? Eight layers and one clear repayment flow.",
     },
     {
       title: "What could go wrong",
-      body: "Low opt-in, middleware gaps, paystub confusion, state restrictions, and reconciliation errors can all sink the pilot.",
+      body: "Promising direct payroll integrations, 50-state compliance, or automatic job-change recovery on day one would be a claim we cannot back yet.",
     },
     {
       title: "What we need to prove next",
-      body: "Define the cohort, baseline, states, payroll middleware, consent flow, success threshold, and failure thresholds before building more.",
+      body: "Build the smallest credible version: a lender API, consent, five pilot-state rules, reconciliation, and manual job-change re-linking.",
     },
   ],
-  "growth-system": [
+  "next-30": [
     {
       title: "What this means",
-      body: "The first sale is to lenders. Borrowers and employers matter, but they are not the main buyer in the first motion.",
+      body: "The next month is about proof, counsel review, and a cleaner story, not new features.",
     },
     {
       title: "Why it matters",
-      body: "A lender buys lower loss risk, cleaner servicing, and less repayment friction. That is a clearer story than broad financial wellness.",
+      body: "A narrow, verified pilot beats a big roadmap with open legal and trust questions.",
     },
     {
       title: "What could go wrong",
-      body: "A consumer-first message can make Kopis look like a cash-advance app instead of lender infrastructure.",
+      body: "Trying to fundraise, build, and sell before the risk map is clean creates rework and weak diligence answers.",
     },
     {
       title: "What we need to prove next",
-      body: "Write the pilot packet in lender language: portfolio baseline, implementation lift, borrower consent, servicing workflow, and ROI math.",
-    },
-  ],
-  "borrower-trust": [
-    {
-      title: "What this means",
-      body: "Borrower trust is the part of the rail the borrower actually feels: the consent screen, the paystub line item, the support path, and the ability to stop or change it.",
-    },
-    {
-      title: "Why it matters",
-      body: "Recent enforcement actions in adjacent cash-advance markets keep circling the same problem: people were confused about fees, timing, tips, cancellation, or what they had agreed to.",
-    },
-    {
-      title: "What could go wrong",
-      body: "If a borrower sees a mysterious deduction, cannot revoke cleanly, or does not understand payroll access, the trust layer fails even if the lender math works.",
-    },
-    {
-      title: "What we need to prove next",
-      body: "Draft counsel-reviewed borrower language for consent, paystub labels, revocation, short-paycheck scenarios, job changes, data access, and support.",
-    },
-  ],
-  "next-moves": [
-    {
-      title: "What this means",
-      body: "The next work is about removing unknowns. Do not add features until legal, middleware, consent, and pilot proof are clearer.",
-    },
-    {
-      title: "Why it matters",
-      body: "A narrow, verified pilot beats a big roadmap with unresolved legal and trust questions.",
-    },
-    {
-      title: "What could go wrong",
-      body: "Trying to fundraise, build, and sell before the risk map is clean will create rework and weak diligence answers.",
-    },
-    {
-      title: "What we need to prove next",
-      body: "Counsel shortlist, lender target list, middleware ToS review, borrower trust draft, state matrix v0, and pilot one-pager.",
-    },
-  ],
-  "investor-kit": [
-    {
-      title: "What this means",
-      body: "The investor packet should make the thesis easy to inspect: problem, category map, wedge, legal queue, pilot plan, and proof still missing.",
-    },
-    {
-      title: "Why it matters",
-      body: "Investors do not need every detail first. They need to see that the hard questions are named and sequenced.",
-    },
-    {
-      title: "What could go wrong",
-      body: "A deck that hides counsel work, borrower trust, or middleware dependency will fall apart in diligence.",
-    },
-    {
-      title: "What we need to prove next",
-      body: "Package the counsel memo outline, lender pilot brief, borrower trust draft, and one-page research receipt into the same diligence story.",
+      body: "Shortlist counsel, name the target lenders, check the middleware terms, draft the borrower language, and write the pilot one-pager.",
     },
   ],
 };
@@ -475,8 +394,8 @@ export const pilotFacts: FactCard[] = [
   },
   {
     label: "Target lift",
-    value: "30%+ 60-day delinquency reduction",
-    detail: "Threshold must be validated against lender portfolio economics before external claims.",
+    value: "Lower 60-day delinquency",
+    detail: "Pilot hypothesis: target a 30%+ reduction, validated against the lender's real portfolio economics before any external claim.",
   },
   {
     label: "Operating bounds",
@@ -487,22 +406,22 @@ export const pilotFacts: FactCard[] = [
 
 export const pilotTimeline: TimelineItem[] = [
   {
-    date: "May 22",
+    date: "Step 1",
     title: "Wage assignment framework",
     body: "Create the state-screening memo outline and counsel question set.",
   },
   {
-    date: "May 23",
+    date: "Step 2",
     title: "Funds flow and roles",
     body: "Draw borrower, lender, payroll provider, Kopis, repayment account, and settlement responsibilities.",
   },
   {
-    date: "May 26",
+    date: "Step 3",
     title: "MVP scope lock",
     body: "Freeze the smallest credible product: consent, scheduling, reconciliation, exceptions, manual re-link.",
   },
   {
-    date: "May 28",
+    date: "Step 4",
     title: "Diligence packet v1",
     body: "Package pilot brief, legal queue, competitor wedge, borrower trust draft, and implementation lift.",
   },
@@ -512,7 +431,7 @@ export const growthItems: WorkItem[] = [
   {
     title: "Primary ICP",
     body:
-      "Mid-market installment lenders with annual originations above $100M, measurable loss-rate pressure, and no internal payroll linked repayment system.",
+      "Mid-market installment lenders with annual originations of roughly $50M to $500M, measurable loss-rate pressure, and no internal payroll linked repayment system.",
   },
   {
     title: "Lead pitch",

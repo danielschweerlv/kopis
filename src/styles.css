@@ -1134,6 +1134,24 @@ strong {
   line-height: 1.48;
 }
 
+.market-player-source {
+  grid-column: 1 / -1;
+  margin-top: 0.1rem;
+  color: var(--faint);
+  font-size: 0.7rem;
+  font-weight: 720;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  border-bottom: 1px dotted var(--line-soft);
+  width: fit-content;
+  padding-bottom: 1px;
+  transition: color 0.18s ease;
+}
+
+.market-player-source:hover {
+  color: var(--text);
+}
+
 .investor-kit-hero {
   display: grid;
   grid-template-columns: minmax(0, 0.88fr) minmax(30rem, 1.12fr);
