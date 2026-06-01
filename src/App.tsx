@@ -104,6 +104,29 @@ const topNavLabelByRoute: Record<RouteId, string> = {
 
 const routeByPath = new Map(routes.map((route) => [route.path, route]));
 
+const commandBriefSignals = [
+  {
+    label: "Verified",
+    title: "Product posture",
+    body: "Payroll-linked repayment orchestration for third-party lenders; not a lender and not a payroll API.",
+  },
+  {
+    label: "Needs counsel",
+    title: "Legal gate",
+    body: "Voluntary wage assignment, servicing role, money transmission, and pilot-state scope stay open until reviewed.",
+  },
+  {
+    label: "Assumption",
+    title: "Pilot wedge",
+    body: "Personal or medical installment lenders are the first proving ground before broader credit categories.",
+  },
+  {
+    label: "Next",
+    title: "Proof order",
+    body: "Confirm middleware permission, borrower consent language, reconciliation workflow, and one clean opt-in path.",
+  },
+];
+
 type IpClock = {
   time: string;
   zone: string;
@@ -404,16 +427,44 @@ function NavigationHeader({
 }) {
   return (
     <header className="site-header" aria-label="KOPIS navigation">
-      <div className="site-header-sheen" aria-hidden="true" />
-      <nav className="site-nav">
-        <div className="site-nav-links" aria-label="War Room routes">
+      <nav className="site-nav" aria-label="KOPIS War Room rooms">
+        <a
+          className="site-wordmark"
+          href="/command-brief"
+          onClick={(event) => onNavigate(event, "/command-brief")}
+        >
+          KOPIS
+        </a>
+        <ul className="site-nav-links" aria-label="War Room routes">
           {routes.map((route) => (
-            <NavLink active={activeRoute.id === route.id} key={route.id} onNavigate={onNavigate} route={route} />
+            <li key={route.id}>
+              <NavLink active={activeRoute.id === route.id} onNavigate={onNavigate} route={route} />
+            </li>
           ))}
-        </div>
+        </ul>
         <RouteMenu activeRoute={activeRoute} onNavigate={onNavigate} />
-        <div className="site-header-actions">
-          <ThemeToggle compact onThemeChange={onThemeChange} theme={theme} />
+        <div className="site-header-actions" aria-label="Theme controls">
+          <button
+            aria-label="Switch to day mode"
+            aria-pressed={theme === "day"}
+            className="nav-icon-button"
+            onClick={() => onThemeChange("day")}
+            type="button"
+          >
+            <Sun size={16} aria-hidden="true" />
+          </button>
+          <button
+            aria-label="Switch to night mode"
+            aria-pressed={theme === "night"}
+            className="nav-icon-button nav-icon-button-active"
+            onClick={() => onThemeChange("night")}
+            type="button"
+          >
+            <Moon size={16} aria-hidden="true" />
+            <span className="nav-icon-badge" aria-hidden="true">
+              1
+            </span>
+          </button>
         </div>
       </nav>
     </header>
@@ -661,15 +712,15 @@ function AudioVisualizer({ compact = false }: { compact?: boolean }) {
       barRadius: 12,
       barWidth: compact ? 2 : 3,
       container: waveformRef.current,
-      cursorColor: "rgba(35, 49, 70, 0.44)",
+      cursorColor: "rgba(98, 128, 112, 0.58)",
       cursorWidth: 1,
       dragToSeek: true,
       height: compact ? 72 : 86,
       hideScrollbar: true,
       normalize: true,
-      progressColor: "#176cff",
+      progressColor: "#50d28f",
       url: "/media/kopis-introaudio.wav",
-      waveColor: "rgba(30, 56, 86, 0.62)",
+      waveColor: "rgba(122, 144, 135, 0.54)",
     });
 
     wavesurferRef.current = wavesurfer;
@@ -765,6 +816,24 @@ function VideoFrame({ compact = false }: { compact?: boolean }) {
   );
 }
 
+function CommandSignalRail() {
+  return (
+    <section className="command-signal-rail" aria-label="Command brief evidence posture">
+      {commandBriefSignals.map((signal) => (
+        <article
+          className="command-signal"
+          data-label={signal.label.toLowerCase().replace(/\s+/g, "-")}
+          key={signal.title}
+        >
+          <span>{signal.label}</span>
+          <strong>{signal.title}</strong>
+          <p>{signal.body}</p>
+        </article>
+      ))}
+    </section>
+  );
+}
+
 function CommandBriefPage({
   onNavigate,
   theme,
@@ -791,7 +860,10 @@ function CommandBriefPage({
             continuity.
           </p>
         </div>
-        <AudioVisualizer />
+        <div className="landing-media-stack">
+          <AudioVisualizer />
+          <CommandSignalRail />
+        </div>
       </section>
       <PlainEnglishBrief routeId="command-brief" />
     </section>
