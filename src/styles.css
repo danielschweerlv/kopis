@@ -493,46 +493,60 @@ strong {
 }
 
 .landing-shell .top-bar {
-  margin-bottom: 1rem;
+  margin-bottom: 0;
 }
 
 .top-bar {
-  position: sticky;
-  top: 0;
-  z-index: 5;
+  position: relative;
+  z-index: 6;
   display: grid;
   grid-template-columns: 0.9fr 0.9fr 1.1fr;
   gap: 1px;
+  width: min(100% - 2.4rem, calc(1560px - 2.4rem));
+  margin: 0.55rem auto 0;
   overflow: hidden;
-  margin-bottom: 1rem;
   border: 1px solid var(--line-soft);
-  border-radius: var(--radius);
+  border-radius: calc(var(--radius) - 5px);
   background: var(--line-soft);
-  box-shadow: 0 16px 40px oklch(8% 0.02 248 / 28%);
+  box-shadow: 0 4px 14px oklch(8% 0.02 248 / 16%);
 }
 
 .top-bar > div {
+  display: flex;
   min-width: 0;
-  padding: 0.66rem 0.8rem;
+  align-items: baseline;
+  gap: 0.45rem;
+  padding: 0.3rem 0.75rem;
   background: var(--glass-strong);
   backdrop-filter: blur(18px);
 }
 
+.top-bar span {
+  flex: none;
+  font-size: 0.56rem;
+  letter-spacing: 0.1em;
+}
+
 .top-bar strong {
-  display: block;
-  margin-top: 0.16rem;
+  display: inline;
+  min-width: 0;
+  margin-top: 0;
+  overflow: hidden;
   color: var(--text);
-  font-size: 0.82rem;
-  line-height: 1.25;
+  font-size: 0.72rem;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .top-bar small {
-  display: block;
-  margin-top: 0.12rem;
+  display: inline;
+  flex: none;
+  margin: 0 0 0 0.1rem;
   overflow: hidden;
   color: var(--faint);
-  font-size: 0.69rem;
-  line-height: 1.2;
+  font-size: 0.58rem;
+  line-height: 1.15;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1839,8 +1853,7 @@ td strong {
   }
 
   .top-bar {
-    position: static;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    position: relative;
   }
 
   .landing-grid,
@@ -2620,11 +2633,11 @@ td strong {
 }
 
 .content-shell {
-  padding-top: 5rem;
+  padding-top: 1.1rem;
 }
 
 .top-bar {
-  top: 4.75rem;
+  top: 0;
 }
 
 .landing-shell .content-shell {
@@ -3025,11 +3038,11 @@ td strong {
 
   .content-shell,
   .landing-shell .content-shell {
-    padding-top: 5.15rem;
+    padding-top: 1.1rem;
   }
 
   .top-bar {
-    top: 4.7rem;
+    top: 0;
   }
 
   .command-status-grid,
@@ -3071,11 +3084,11 @@ td strong {
 
   .content-shell,
   .landing-shell .content-shell {
-    padding: 4.65rem 0.72rem 1.6rem;
+    padding: 0.95rem 0.72rem 1.6rem;
   }
 
   .top-bar {
-    top: 4.2rem;
+    top: 0;
   }
 
   .command-hero-copy {

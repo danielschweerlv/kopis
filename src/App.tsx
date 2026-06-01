@@ -1765,6 +1765,7 @@ function App() {
   return (
     <main className={`app-shell ${activeRoute.id === "command-brief" ? "landing-shell" : ""}`} data-theme={theme}>
       <AmbientField theme={theme} />
+      {activeRoute.id !== "command-brief" && <TopBar activeRoute={activeRoute} />}
       <NavigationHeader
         activeRoute={activeRoute}
         onNavigate={handleNavigate}
@@ -1772,7 +1773,6 @@ function App() {
         theme={theme}
       />
       <section className="content-shell">
-        {activeRoute.id !== "command-brief" && <TopBar activeRoute={activeRoute} />}
         <RouteContent route={activeRoute} onNavigate={navigate} theme={theme} />
       </section>
     </main>
