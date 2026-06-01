@@ -633,7 +633,7 @@ function TopBar({
   const clock = useIpClock();
 
   return (
-    <header className="top-bar" aria-label="War Room context">
+    <footer className="top-bar" aria-label="War Room context">
       <div>
         <span>Founder</span>
         <strong>Joshua Walters</strong>
@@ -647,7 +647,7 @@ function TopBar({
         <span>Active room</span>
         <strong>{activeRoute.label}</strong>
       </div>
-    </header>
+    </footer>
   );
 }
 
@@ -1765,7 +1765,6 @@ function App() {
   return (
     <main className={`app-shell ${activeRoute.id === "command-brief" ? "landing-shell" : ""}`} data-theme={theme}>
       <AmbientField theme={theme} />
-      {activeRoute.id !== "command-brief" && <TopBar activeRoute={activeRoute} />}
       <NavigationHeader
         activeRoute={activeRoute}
         onNavigate={handleNavigate}
@@ -1775,6 +1774,7 @@ function App() {
       <section className="content-shell">
         <RouteContent route={activeRoute} onNavigate={navigate} theme={theme} />
       </section>
+      <TopBar activeRoute={activeRoute} />
     </main>
   );
 }
