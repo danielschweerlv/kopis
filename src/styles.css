@@ -3136,4 +3136,39 @@ td strong {
     grid-column: 2;
     width: max-content;
   }
+
+  /* Flatten the hero + operating wrappers so the briefing audio can sit
+     directly above the "Current stage" status card on mobile. */
+  .command-hero,
+  .command-operating-grid {
+    display: contents;
+  }
+
+  .command-hero-copy {
+    order: 1;
+  }
+
+  .command-audio-module {
+    order: 2;
+  }
+
+  .command-status-grid {
+    order: 3;
+  }
+
+  .command-evidence-module {
+    order: 4;
+  }
+
+  .command-queue-module {
+    order: 5;
+  }
+
+  .command-next-module {
+    order: 6;
+  }
+
+  .command-dashboard > .plain-brief {
+    order: 7;
+  }
 }
