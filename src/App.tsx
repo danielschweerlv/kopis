@@ -23,7 +23,8 @@ import {
   Video,
   type LucideIcon,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import WaveSurfer from "wavesurfer.js";
 import {
   borrowerTrustPrinciples,
   borrowerTrustRows,
@@ -211,9 +212,6 @@ function RouteMenu({
   return (
     <details className="route-menu">
       <summary>
-        <span className="route-menu-logo-shell" aria-hidden="true">
-          <img className="route-menu-logo" src="/brand/kopis-logo-night.png" alt="" />
-        </span>
         <span className="route-menu-current">
           <span>Room</span>
           <strong>{topNavLabelByRoute[activeRoute.id]}</strong>
@@ -408,7 +406,6 @@ function NavigationHeader({
     <header className="site-header" aria-label="KOPIS navigation">
       <div className="site-header-sheen" aria-hidden="true" />
       <nav className="site-nav">
-        <LogoMark theme={theme} onNavigate={onNavigate} />
         <div className="site-nav-links" aria-label="War Room routes">
           {routes.map((route) => (
             <NavLink active={activeRoute.id === route.id} key={route.id} onNavigate={onNavigate} route={route} />
@@ -646,125 +643,111 @@ function formatAudioTime(seconds: number) {
 }
 
 function AudioVisualizer({ compact = false }: { compact?: boolean }) {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const waveformRef = useRef<HTMLDivElement | null>(null);
+  const wavesurferRef = useRef<WaveSurfer | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const bars = useMemo(
-    () => {
-      const barCount = compact ? 88 : 68;
-      const peakHeight = compact ? 118 : 72;
-      const minHeight = compact ? 8 : 4;
-
-      return Array.from({ length: barCount }, (_, index) => {
-        const center = barCount / 2;
-        const distance = Math.abs(index - center) / center;
-        const pulse = Math.abs(Math.sin(index * 0.61)) * 0.7 + Math.abs(Math.sin(index * 0.19)) * 0.5;
-        const envelope = Math.max(0.03, Math.pow(1 - distance, 1.45));
-        const height = Math.max(minHeight, envelope * peakHeight * (0.44 + pulse));
-        return { index, height };
-      });
-    },
-    [compact],
-  );
-  const progress = duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0;
+  const [isReady, setIsReady] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isPlaying) {
+    if (!waveformRef.current) {
       return;
     }
 
-    const intervalId = window.setInterval(() => {
-      const audio = audioRef.current;
+    const wavesurfer = WaveSurfer.create({
+      barGap: compact ? 2 : 3,
+      barRadius: 12,
+      barWidth: compact ? 2 : 3,
+      container: waveformRef.current,
+      cursorColor: "rgba(35, 49, 70, 0.44)",
+      cursorWidth: 1,
+      dragToSeek: true,
+      height: compact ? 72 : 86,
+      hideScrollbar: true,
+      normalize: true,
+      progressColor: "#176cff",
+      url: "/media/kopis-introaudio.wav",
+      waveColor: "rgba(30, 56, 86, 0.62)",
+    });
 
-      if (audio) {
-        setCurrentTime(audio.currentTime);
-      }
-    }, 200);
+    wavesurferRef.current = wavesurfer;
+    setCurrentTime(0);
+    setDuration(0);
+    setIsPlaying(false);
+    setIsReady(false);
+    setLoadError(null);
 
-    return () => window.clearInterval(intervalId);
-  }, [isPlaying]);
+    wavesurfer.on("ready", (loadedDuration) => {
+      setDuration(loadedDuration);
+      setIsReady(true);
+      setLoadError(null);
+    });
+    wavesurfer.on("play", () => setIsPlaying(true));
+    wavesurfer.on("pause", () => setIsPlaying(false));
+    wavesurfer.on("finish", () => {
+      setCurrentTime(0);
+      setIsPlaying(false);
+      wavesurfer.seekTo(0);
+    });
+    wavesurfer.on("timeupdate", (time) => setCurrentTime(time));
+    wavesurfer.on("error", () => {
+      setLoadError("Audio failed to load");
+      setIsReady(false);
+      setIsPlaying(false);
+    });
+
+    return () => {
+      wavesurfer.destroy();
+      wavesurferRef.current = null;
+    };
+  }, [compact]);
 
   const togglePlayback = () => {
-    const audio = audioRef.current;
+    const wavesurfer = wavesurferRef.current;
 
-    if (!audio) {
+    if (!wavesurfer || !isReady) {
       return;
     }
 
-    if (audio.paused) {
-      void audio.play();
-      return;
-    }
-
-    audio.pause();
-  };
-
-  const scrubAudio = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const nextTime = Number(event.currentTarget.value);
-    const audio = audioRef.current;
-
-    setCurrentTime(nextTime);
-
-    if (audio && Number.isFinite(nextTime)) {
-      audio.currentTime = nextTime;
-    }
+    void wavesurfer.playPause();
   };
 
   return (
     <DottedFrame
       label="Kopis intro audio"
-      className={`${compact ? "audio-frame compact" : "audio-frame"}${isPlaying ? " is-playing" : ""}`}
+      className={`${compact ? "audio-frame compact" : "audio-frame"} wave-audio-frame${isPlaying ? " is-playing" : ""}`}
     >
-      <div className="media-label">
-        <AudioLines size={18} aria-hidden="true" />
-        <span>Kopis Intro Audio</span>
-      </div>
-      <div className="waveform" aria-hidden="true">
-        {bars.map((bar) => (
-          <span key={bar.index} style={{ "--dot-h": `${bar.height}px`, "--dot-i": bar.index } as CSSProperties} />
-        ))}
-      </div>
-      <div className="audio-footer">
-        <audio
-          className="war-room-audio-source"
-          onEnded={(event) => {
-            event.currentTarget.currentTime = 0;
-            setIsPlaying(false);
-            setCurrentTime(0);
-          }}
-          onLoadedMetadata={(event) => setDuration(event.currentTarget.duration)}
-          onPause={() => setIsPlaying(false)}
-          onPlay={() => setIsPlaying(true)}
-          onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
-          preload="metadata"
-          ref={audioRef}
-          src="/media/kopis-introaudio.wav"
-        />
+      <div className="wave-player-head">
         <button
           aria-label={isPlaying ? "Pause Kopis intro audio" : "Play Kopis intro audio"}
-          className="audio-control-btn"
+          className="wave-play-button"
+          disabled={!isReady || Boolean(loadError)}
           onClick={togglePlayback}
           type="button"
         >
-          {isPlaying ? <Pause size={16} aria-hidden="true" /> : <Play size={16} aria-hidden="true" />}
+          {isReady ? (
+            isPlaying ? (
+              <Pause size={18} aria-hidden="true" />
+            ) : (
+              <Play size={18} aria-hidden="true" />
+            )
+          ) : (
+            <span className="wave-loading-dot" aria-hidden="true" />
+          )}
         </button>
-        <div className="audio-progress-wrap">
-          <input
-            aria-label="Kopis intro audio progress"
-            className="audio-progress"
-            max={duration || 0}
-            min="0"
-            onChange={scrubAudio}
-            step="0.1"
-            style={{ "--audio-progress": `${progress}%` } as CSSProperties}
-            type="range"
-            value={duration > 0 ? Math.min(currentTime, duration) : 0}
-          />
+        <div className="wave-track-meta">
+          <span>Kopis Intro Audio</span>
+          <strong>Founder command briefing</strong>
         </div>
-        <time className="audio-time">
+        <time className="wave-audio-time" aria-live="off">
           {formatAudioTime(currentTime)} / {formatAudioTime(duration)}
         </time>
+      </div>
+      <div className="waveform-shell">
+        <div className="waveform-surface" ref={waveformRef} />
+        {loadError && <p className="wave-error">{loadError}</p>}
       </div>
     </DottedFrame>
   );
@@ -784,18 +767,23 @@ function VideoFrame({ compact = false }: { compact?: boolean }) {
 
 function CommandBriefPage({
   onNavigate,
+  theme,
 }: {
   onNavigate: (path: string) => void;
+  theme: ThemeMode;
 }) {
+  const heroLogoSrc = theme === "day" ? "/brand/kopis-logo-day.png" : "/brand/kopis-logo-night.png";
+
   return (
     <section className="landing-stage">
       <section className="landing-grid">
         <div className="landing-copy">
           <span className="eyebrow landing-eyebrow">Founder Command Center</span>
-          <h1>
-            KOPIS
-            <br />
-            War Room
+          <h1 className="hero-title" aria-label="KOPIS War Room">
+            <span className="hero-logo-shell" aria-hidden="true">
+              <img className="hero-logo" src={heroLogoSrc} alt="" />
+            </span>
+            <span className="hero-war-room">War Room</span>
           </h1>
           <p>
             Payroll linked repayment system. Third-party lenders integrate once, then orchestrate
@@ -1014,9 +1002,11 @@ function InvestorKitPage() {
 function RouteContent({
   route,
   onNavigate,
+  theme,
 }: {
   route: RouteDefinition;
   onNavigate: (path: string) => void;
+  theme: ThemeMode;
 }) {
   switch (route.id) {
     case "what-is-kopis":
@@ -1037,7 +1027,7 @@ function RouteContent({
       return <InvestorKitPage />;
     case "command-brief":
     default:
-      return <CommandBriefPage onNavigate={onNavigate} />;
+      return <CommandBriefPage onNavigate={onNavigate} theme={theme} />;
   }
 }
 
@@ -1160,7 +1150,7 @@ function InvestorBriefView() {
 
 function App() {
   const [activeRoute, setActiveRoute] = useState(() => resolveRoute(window.location.pathname));
-  const [theme, setTheme] = useState<ThemeMode>("night");
+  const [theme, setTheme] = useState<ThemeMode>("day");
   const [pathname, setPathname] = useState(window.location.pathname);
 
   useEffect(() => {
@@ -1226,7 +1216,7 @@ function App() {
         {activeRoute.id !== "command-brief" && activeRoute.id !== "investor-kit" && (
           <TopBar activeRoute={activeRoute} />
         )}
-        <RouteContent route={activeRoute} onNavigate={navigate} />
+        <RouteContent route={activeRoute} onNavigate={navigate} theme={theme} />
       </section>
     </main>
   );
